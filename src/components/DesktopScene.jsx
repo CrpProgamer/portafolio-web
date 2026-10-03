@@ -61,7 +61,7 @@ const Monitor = ({ onClick, isZooming }) => {
       </Plane>
       {/* Screen light cast onto desk */}
       <pointLight position={[0, 0, 1]} intensity={hovered ? 3 : 1} distance={8} color="#2ecc71" />
-      <Text position={[0, 0, 0.17]} fontSize={0.25} color="#000" font="https://fonts.gstatic.com/s/courierprime/v9/u-450q2lj-cWvPBxoqsOg8s-TjU.woff">
+      <Text position={[0, 0, 0.17]} fontSize={0.25} color="#000">
         {hovered ? "> ACCEDER" : "SYS.ONLINE"}
       </Text>
     </group>
@@ -87,7 +87,7 @@ const DocumentFolder = ({ onClick, isZooming }) => {
       <Plane args={[1.1, 1.6]} position={[-0.05, 0, 0.02]} receiveShadow castShadow>
         <meshStandardMaterial color="#3b5998" roughness={0.8} />
       </Plane>
-      <Text position={[0, 0, 0.03]} rotation={[0, 0, Math.PI / 2]} fontSize={0.15} color="#600000" font="https://fonts.gstatic.com/s/courierprime/v9/u-450q2lj-cWvPBxoqsOg8s-TjU.woff">
+      <Text position={[0, 0, 0.03]} rotation={[0, 0, Math.PI / 2]} fontSize={0.15} color="#600000">
         CONFIDENCIAL
       </Text>
       {hovered && !isZooming && (
