@@ -353,7 +353,7 @@ const UnstableDeskLight = () => {
 
 
 const ImportedCamera = () => {
-  const { scene } = useGLTF('/assets/models/outlast_camera.glb');
+  const { scene } = useGLTF('/assets/models/low_poly_outlast_camera.glb');
   const cameraModel = useMemo(() => scene.clone(true), [scene]);
 
   useEffect(() => {
