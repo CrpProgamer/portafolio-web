@@ -379,9 +379,9 @@ const ImportedCamera = () => {
   }, [camera]);
 
   return (
-    <group position={[-4.0, 0.4, 0.5]} rotation={[0, 0.48, 0]} scale={0.0004}>
+    <group position={[-4.0, 0.4, 0.5]} rotation={[0, 0.48, 0]}>
       <Center>
-        <primitive object={camera} />
+        <primitive object={camera} scale={0.00002} />
       </Center>
     </group>
   );
@@ -400,9 +400,9 @@ const Keyboard = () => {
   }, [keyboard]);
 
   return (
-    <group position={[-2.55, 0.12, 1.4]} rotation={[0, 0.1, 0]} scale={0.05}>
+    <group position={[-2.55, 0.12, 1.4]} rotation={[0, 0.1, 0]}>
       <Center>
-        <primitive object={keyboard} />
+        <primitive object={keyboard} scale={1} />
       </Center>
     </group>
   );
