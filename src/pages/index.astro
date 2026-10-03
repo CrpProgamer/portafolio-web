@@ -1,73 +1,19 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import StatusBar from '../components/StatusBar.jsx';
-import InvestigationFiles from '../components/InvestigationFiles.jsx';
+import '../styles/global.css';
+import DesktopScene from '../components/DesktopScene.jsx';
 ---
 
-<Layout title="Expediente: Cristobal Antonio Rojas Perez | Ing. BI">
-  <!-- Utilizamos client:load para que el componente de React se hidrate inmediatamente -->
-  <StatusBar client:load />
-
-  <section class="mt-8 border border-murkoff-dark bg-murkoff-black p-6 relative shadow-[0_0_15px_rgba(138,3,3,0.2)]">
-    <!-- Esquinas estilo visor/cámara -->
-    <div class="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-murkoff-glitch"></div>
-    <div class="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-murkoff-glitch"></div>
-    <div class="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-murkoff-glitch"></div>
-    <div class="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-murkoff-glitch"></div>
-    
-    <h2 class="text-2xl font-bold mb-6 border-b border-murkoff-dark pb-2 inline-block">
-      [ PERFIL DEL SUJETO / ANALISTA DE DATOS ]
-    </h2>
-    
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-      <div class="col-span-1 border border-murkoff-dark p-4 flex flex-col items-center justify-start bg-[#111] relative overflow-hidden">
-        <div class="absolute inset-0 bg-murkoff-glitch opacity-5 animate-pulse"></div>
-        <!-- Foto estilo expediente -->
-        <div class="w-full aspect-[3/4] bg-black border-2 border-murkoff-blood flex items-center justify-center relative group">
-          <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMDAwIj48L3JlY3Q+CjxyZWN0IHdpZHRoPSIxIiBoZWlnaHQ9IjEiIGZpbGw9IiMzMzMiPjwvcmVjdD4KPC9zdmc+')] opacity-50"></div>
-          <span class="text-murkoff-blood font-bold text-center rotate-[-15deg] border-2 border-murkoff-blood p-2 uppercase tracking-widest text-lg shadow-[0_0_10px_#8a0303]">
-            REDACTADO
-          </span>
-        </div>
-        <p class="text-center font-bold mt-4 text-murkoff-paper text-lg">C.A. ROJAS PEREZ</p>
-        <p class="text-sm text-murkoff-blood text-center font-bold">Ingeniero Business Intelligence</p>
-        <div class="mt-4 w-full border-t border-murkoff-dark pt-2">
-          <p class="text-xs text-gray-500 flex justify-between"><span>EDAD:</span> <span>[DATOS CORRUPTOS]</span></p>
-          <p class="text-xs text-gray-500 flex justify-between"><span>UBICACIÓN:</span> <span>[CLASIFICADO]</span></p>
-          <p class="text-xs text-gray-500 flex justify-between"><span>NIVEL ACCESO:</span> <span class="text-murkoff-glitch">OMEGA</span></p>
-        </div>
-      </div>
-      
-      <div class="col-span-1 md:col-span-3 space-y-6">
-        <div class="bg-[#0a0a0a] p-4 border-l-2 border-murkoff-blood">
-          <p class="text-sm text-justify leading-relaxed text-gray-300">
-            <span class="text-murkoff-glitch font-bold">> OBSERVACIONES INICIALES:</span><br/><br/>
-            El sujeto demuestra aptitudes inusuales para la extracción, limpieza y manipulación de volúmenes masivos de datos. Su especialidad radica en el análisis predictivo y la visualización, descubriendo patrones ocultos que el ojo humano normal no percibe. Su metodología de trabajo raya en lo obsesivo, garantizando integridad absoluta en los repositorios de datos.
-          </p>
-        </div>
-        
-        <div class="bg-[#0a0a0a] p-4 border-l-2 border-murkoff-glitch">
-          <p class="text-sm text-justify leading-relaxed text-gray-300">
-            <span class="text-murkoff-glitch font-bold">> TECNOLOGÍAS DETECTADAS (SCAN COMPLETO):</span><br/><br/>
-            Se ha interceptado tráfico indicando dominio de las siguientes herramientas:
-          </p>
-          <ul class="grid grid-cols-2 gap-2 mt-4 text-sm font-mono text-murkoff-paper">
-            <li class="flex items-center gap-2"><span class="text-murkoff-blood">[*]</span> Power BI / DAX</li>
-            <li class="flex items-center gap-2"><span class="text-murkoff-blood">[*]</span> SQL / Modelado de Datos</li>
-            <li class="flex items-center gap-2"><span class="text-murkoff-blood">[*]</span> Python / Pandas / ML</li>
-            <li class="flex items-center gap-2"><span class="text-murkoff-blood">[*]</span> Astro / React</li>
-            <li class="flex items-center gap-2"><span class="text-murkoff-blood">[*]</span> ETL Pipelines</li>
-            <li class="flex items-center gap-2"><span class="text-murkoff-blood">[*]</span> Tailwind CSS</li>
-          </ul>
-        </div>
-        
-        <div class="border border-murkoff-dark p-4 bg-black/50 mt-4">
-          <p class="text-sm text-murkoff-blood animate-pulse mb-2">ADVERTENCIA: ACCEDIENDO A ARCHIVOS DEL CASO COLCHAGUA...</p>
-          <p class="text-xs text-gray-500">Se requiere autorización adicional para visualizar el expediente completo del caso Colchagua y los notebooks de investigación. Inicie módulo interactivo a continuación.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <InvestigationFiles client:load />
-</Layout>
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Expediente Desclasificado: Cristobal Antonio Rojas Perez - Analista de Datos / Business Intelligence" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Expediente: C.A. Rojas Perez | BI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  </head>
+  <body class="bg-black m-0 p-0 overflow-hidden font-typewriter select-none">
+    <DesktopScene client:only="react" />
+  </body>
+</html>
