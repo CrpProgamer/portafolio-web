@@ -379,7 +379,7 @@ const ImportedCamera = () => {
   }, [camera]);
 
   return (
-    <group position={[-4.0, 0.4, 0.5]} rotation={[0, 0.48, 0]} scale={0.002}>
+    <group position={[-4.0, 0.4, 0.5]} rotation={[0, 0.48, 0]} scale={0.0004}>
       <Center>
         <primitive object={camera} />
       </Center>
@@ -388,38 +388,22 @@ const ImportedCamera = () => {
 };
 
 const Keyboard = () => {
-  const rows = [
-    ['ESC', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'],
-    ['TAB', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
-    ['CAPS', 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'Ñ'],
-    ['SHIFT', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', 'ENTER']
-  ];
+  const { scene } = useGLTF('/assets/models/keyboard.glb');
+  const keyboard = useMemo(() => scene.clone(true), [scene]);
+
+  useEffect(() => {
+    keyboard.traverse((object) => {
+      if (!object.isMesh) return;
+      object.castShadow = true;
+      object.receiveShadow = true;
+    });
+  }, [keyboard]);
 
   return (
-    <group position={[-2.55, 0.12, 1.4]} rotation={[0, 0.1, 0]}>
-      <RoundedBox args={[2.88, 0.14, 1.02]} radius={0.045} smoothness={2} castShadow receiveShadow>
-        <meshStandardMaterial color="#11100e" roughness={0.55} metalness={0.52} />
-      </RoundedBox>
-      {rows.map((row, rowIndex) => row.map((label, keyIndex) => {
-        const isWide = ['ESC', 'TAB', 'CAPS', 'SHIFT', 'ENTER'].includes(label);
-        const keyWidth = isWide ? 0.27 : 0.18;
-        const x = -1.14 + keyIndex * 0.218 + (isWide ? 0.02 : 0);
-        const z = -0.32 + rowIndex * 0.205;
-        return (
-          <group key={`${label}-${rowIndex}`} position={[x, 0.11, z]}>
-            <RoundedBox args={[keyWidth, 0.075, 0.155]} radius={0.018} smoothness={2} castShadow>
-              <meshStandardMaterial color={label === 'ENTER' ? '#27271f' : '#292924'} roughness={0.72} metalness={0.16} />
-            </RoundedBox>
-            <Text position={[0, 0.151, 0]} rotation={[-Math.PI / 2, 0, 0]} fontSize={label.length > 3 ? 0.029 : 0.042} color="#d1c9af" anchorX="center" anchorY="middle">
-              {label}
-            </Text>
-          </group>
-        );
-      }))}
-      <RoundedBox args={[1.15, 0.075, 0.15]} radius={0.018} smoothness={2} position={[0.28, 0.11, 0.385]} castShadow>
-        <meshStandardMaterial color="#292924" roughness={0.72} metalness={0.16} />
-      </RoundedBox>
-      <Text position={[0.28, 0.151, 0.385]} rotation={[-Math.PI / 2, 0, 0]} fontSize={0.031} color="#d1c9af" anchorX="center" anchorY="middle">ESPACIO</Text>
+    <group position={[-2.55, 0.12, 1.4]} rotation={[0, 0.1, 0]} scale={0.05}>
+      <Center>
+        <primitive object={keyboard} />
+      </Center>
     </group>
   );
 };
