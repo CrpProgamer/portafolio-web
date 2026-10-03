@@ -247,20 +247,20 @@ export default function DesktopScene() {
           <color attach="background" args={['#010101']} />
           <fog attach="fog" args={['#010101', 3, 12]} />
           
-          <ambientLight intensity={0.02} />
+          <ambientLight intensity={0.5} />
           
           {/* Lámpara de techo intensa apuntando al escritorio */}
           <spotLight 
-            position={[0, 8, 0]} 
-            angle={0.7} 
+            position={[0, 5, 0]} 
+            angle={0.8} 
             penumbra={0.5} 
-            intensity={150} 
+            intensity={5000} 
             color="#fff4e0" 
             castShadow 
             shadow-mapSize={[2048, 2048]}
             shadow-bias={-0.0001}
             decay={2}
-            distance={15}
+            distance={20}
           />
 
           <Room />
