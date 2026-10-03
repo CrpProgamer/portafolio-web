@@ -349,43 +349,8 @@ const UnstableDeskLight = () => {
   );
 };
 
-const Battery = ({ position, rotation = 0 }) => (
-  <group position={position} rotation={[0, rotation, Math.PI / 2]}>
-    <mesh castShadow receiveShadow>
-      <cylinderGeometry args={[0.105, 0.105, 0.58, 14]} />
-      <meshStandardMaterial color="#53604a" roughness={0.64} metalness={0.42} />
-    </mesh>
-    <mesh position={[0, 0.305, 0]}>
-      <cylinderGeometry args={[0.08, 0.08, 0.035, 14]} />
-      <meshStandardMaterial color="#b8b6a9" roughness={0.32} metalness={0.9} />
-    </mesh>
-    <mesh position={[0, -0.305, 0]}>
-      <cylinderGeometry args={[0.09, 0.09, 0.022, 14]} />
-      <meshStandardMaterial color="#292b25" roughness={0.5} metalness={0.55} />
-    </mesh>
-  </group>
-);
 
-const ImportedCamera = () => {
-  const { scene } = useGLTF('/assets/models/outlast_camera.glb');
-  const camera = useMemo(() => scene.clone(true), [scene]);
 
-  useEffect(() => {
-    camera.traverse((object) => {
-      if (!object.isMesh) return;
-      object.castShadow = true;
-      object.receiveShadow = true;
-    });
-  }, [camera]);
-
-  return (
-    <group position={[-4.0, 0.4, 0.5]} rotation={[0, 0.48, 0]}>
-      <Center>
-        <primitive object={camera} scale={0.00002} />
-      </Center>
-    </group>
-  );
-};
 
 const Keyboard = () => {
   const { scene } = useGLTF('/assets/models/keyboard.glb');
@@ -400,9 +365,9 @@ const Keyboard = () => {
   }, [keyboard]);
 
   return (
-    <group position={[-2.55, 0.12, 1.4]} rotation={[0, 0.1, 0]}>
+    <group position={[-2.55, 0.12, 1.4]} rotation={[0, 0.1, 0]} scale={10.0}>
       <Center>
-        <primitive object={keyboard} scale={1} />
+        <primitive object={keyboard} />
       </Center>
     </group>
   );
@@ -484,10 +449,6 @@ const FloatingDust = () => {
 
 const Clutter = () => (
   <group>
-    {/* Phone */}
-    <Box args={[0.8, 0.2, 1.2]} position={[-4, 0.1, 0.5]} rotation={[0, 0.3, 0]} castShadow receiveShadow>
-      <meshStandardMaterial color="#111" roughness={0.5} metalness={0.5} />
-    </Box>
     {/* Stack of folders */}
     <Box args={[1.5, 1.2, 2]} position={[3.5, 0.6, -0.5]} rotation={[0, -0.2, 0]} castShadow receiveShadow>
       <meshStandardMaterial color="#1a1a1a" roughness={0.9} />
@@ -497,10 +458,8 @@ const Clutter = () => (
     </Box>
     <Keyboard />
     <Mouse />
-    <ImportedCamera />
-    <Battery position={[-4.15, 0.16, 1.18]} rotation={0.38} />
-    <Battery position={[-3.72, 0.16, 1.45]} rotation={-0.18} />
-    <Battery position={[-4.54, 0.16, 1.55]} rotation={0.64} />
+
+
   </group>
 );
 
