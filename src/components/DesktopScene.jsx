@@ -365,7 +365,7 @@ const ImportedCamera = () => {
   }, [cameraModel]);
 
   return (
-    <group position={[-4.0, 0.4, 0.5]} rotation={[0, 0.48, 0]} scale={0.00001}>
+    <group position={[-4.6, 0.7, -0.7]} rotation={[0, 1, 0]} scale={5}>
       <Center>
         <primitive object={cameraModel} />
       </Center>
