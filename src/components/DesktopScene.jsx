@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Box, Plane, Text, useCursor } from '@react-three/drei';
+import { Box, Plane, Text, useCursor, RoundedBox } from '@react-three/drei';
 import * as THREE from 'three';
 import InvestigationFiles from './InvestigationFiles.jsx';
 
@@ -30,11 +30,79 @@ const Room = () => (
   </group>
 );
 
-const Desk = () => (
-  <Box args={[14, 0.4, 6]} position={[0, -0.2, 0]} receiveShadow castShadow>
-    <meshStandardMaterial color="#2d1c10" roughness={0.8} metalness={0.1} />
-  </Box>
-);
+const makeTexture = (kind) => {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+
+  if (kind === 'wood') {
+    ctx.fillStyle = '#5a351b';
+    ctx.fillRect(0, 0, 512, 512);
+    for (let i = 0; i < 780; i += 1) {
+      const y = Math.random() * 512;
+      const shade = Math.floor(30 + Math.random() * 55);
+      ctx.strokeStyle = `rgba(${shade + 45}, ${shade}, ${Math.max(8, shade - 20)}, ${0.08 + Math.random() * 0.2})`;
+      ctx.lineWidth = 0.35 + Math.random() * 2;
+      ctx.beginPath();
+      ctx.moveTo(-20, y);
+      ctx.bezierCurveTo(120, y - 8 + Math.random() * 16, 330, y + (Math.random() - 0.5) * 22, 532, y + (Math.random() - 0.5) * 11);
+      ctx.stroke();
+    }
+    ctx.fillStyle = 'rgba(25, 10, 3, 0.22)';
+    for (let i = 0; i < 24; i += 1) {
+      ctx.beginPath();
+      ctx.ellipse(Math.random() * 512, Math.random() * 512, 4 + Math.random() * 18, 1 + Math.random() * 4, Math.random() * Math.PI, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else {
+    ctx.fillStyle = '#b9ad8f';
+    ctx.fillRect(0, 0, 512, 512);
+    for (let i = 0; i < 4500; i += 1) {
+      const alpha = 0.025 + Math.random() * 0.08;
+      ctx.fillStyle = Math.random() > 0.5 ? `rgba(70, 50, 30, ${alpha})` : `rgba(255, 245, 210, ${alpha})`;
+      ctx.fillRect(Math.random() * 512, Math.random() * 512, 1 + Math.random() * 2, 1 + Math.random() * 2);
+    }
+    for (let i = 0; i < 38; i += 1) {
+      ctx.strokeStyle = `rgba(71, 51, 28, ${0.025 + Math.random() * 0.04})`;
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(0, Math.random() * 512);
+      ctx.lineTo(512, Math.random() * 512);
+      ctx.stroke();
+    }
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(kind === 'wood' ? 2.4 : 1.5, kind === 'wood' ? 1 : 1.5);
+  return texture;
+};
+
+const Desk = () => {
+  const woodTexture = useMemo(() => makeTexture('wood'), []);
+  useEffect(() => () => woodTexture.dispose(), [woodTexture]);
+
+  return (
+    <group>
+      {/* Tabla de madera pesada, con canto y patas visibles en la penumbra */}
+      <RoundedBox args={[14, 0.48, 6]} radius={0.07} smoothness={3} position={[0, -0.2, 0]} receiveShadow castShadow>
+        <meshStandardMaterial map={woodTexture} color="#8b5730" roughness={0.72} metalness={0.02} />
+      </RoundedBox>
+      <Box args={[14.08, 0.2, 0.22]} position={[0, -0.47, 2.92]} castShadow receiveShadow>
+        <meshStandardMaterial color="#3a1f0f" roughness={0.9} />
+      </Box>
+      {[
+        [-6.15, -2.1, 2.35], [6.15, -2.1, 2.35],
+        [-6.15, -2.1, -2.35], [6.15, -2.1, -2.35]
+      ].map((position, index) => (
+        <Box key={index} args={[0.38, 3.5, 0.38]} position={position} castShadow>
+          <meshStandardMaterial color="#291507" roughness={0.88} />
+        </Box>
+      ))}
+    </group>
+  );
+};
 
 const Monitor = ({ onClick, isZooming }) => {
   const [hovered, setHovered] = useState(false);
@@ -68,31 +136,93 @@ const Monitor = ({ onClick, isZooming }) => {
 
 const DocumentFolder = ({ onClick, isZooming }) => {
   const [hovered, setHovered] = useState(false);
+  const coverMaterial = useRef();
+  const paperTexture = useMemo(() => makeTexture('paper'), []);
   useCursor(hovered && !isZooming);
+  useEffect(() => () => paperTexture.dispose(), [paperTexture]);
+
+  useFrame(({ clock }) => {
+    if (!coverMaterial.current) return;
+    const time = clock.getElapsedTime();
+    // Pulso muy lento, como una carpeta apenas alcanzada por una lámpara inestable.
+    const slowPulse = 0.035 + (Math.sin(time * 1.35) + 1) * 0.018;
+    const briefFlutter = Math.sin(time * 13.7) > 0.985 ? 0.08 : 0;
+    coverMaterial.current.emissiveIntensity = slowPulse + briefFlutter + (hovered ? 0.08 : 0);
+  });
+
   return (
     <group position={[1.5, 0.02, 0.5]} rotation={[-Math.PI / 2, 0, -0.1]} onClick={!isZooming ? onClick : null} onPointerOver={() => setHovered(true)} onPointerOut={() => setHovered(false)}>
       {/* Sombra de contacto */}
       <Plane args={[1.6, 2.1]} position={[0, 0, -0.01]}>
         <meshBasicMaterial color="#000" opacity={0.5} transparent />
       </Plane>
-      
-      <Plane args={[1.2, 1.6]} position={[0, 0, 0.01]} castShadow receiveShadow>
-        <meshStandardMaterial color="#2d426b" roughness={0.7} />
+      {/* Cantos de hojas irregulares y cubierta azul de expediente */}
+      <Box args={[1.32, 1.76, 0.08]} position={[0, 0, 0.035]} castShadow receiveShadow>
+        <meshStandardMaterial color="#21355b" roughness={0.84} />
+      </Box>
+      <Plane args={[1.21, 1.64]} position={[-0.03, 0, 0.086]} receiveShadow>
+        <meshStandardMaterial ref={coverMaterial} color="#3d5da2" emissive="#24447d" roughness={0.76} />
       </Plane>
-      <Plane args={[1.1, 1.5]} position={[0.05, 0, 0.03]} receiveShadow>
-        <meshStandardMaterial color="#d4cbb3" roughness={1} />
+      <Plane args={[1.14, 1.52]} position={[0.08, 0.03, 0.092]} receiveShadow>
+        <meshStandardMaterial map={paperTexture} color="#c7b99b" roughness={0.98} />
       </Plane>
-      <Plane args={[1.1, 1.6]} position={[-0.05, 0, 0.02]} receiveShadow castShadow>
-        <meshStandardMaterial color="#3b5998" roughness={0.8} />
+      <Plane args={[1.2, 1.63]} position={[-0.08, 0, 0.101]} receiveShadow castShadow>
+        <meshStandardMaterial ref={coverMaterial} color="#476ebc" emissive="#1f3f83" roughness={0.75} />
       </Plane>
-      <Text position={[0, 0, 0.05]} rotation={[0, 0, Math.PI / 2]} fontSize={0.15} color="#600000">
-        CONFIDENCIAL
+      <Box args={[0.6, 0.14, 0.014]} position={[0, 0, 0.112]}>
+        <meshStandardMaterial color="#b8a57d" roughness={0.7} metalness={0.15} />
+      </Box>
+      <Text position={[0, 0, 0.121]} rotation={[0, 0, Math.PI / 2]} fontSize={0.105} color="#180d0b">
+        ARCHIVO RESTRINGIDO
       </Text>
       {hovered && !isZooming && (
         <Text position={[0, -1.2, 0.2]} rotation={[Math.PI / 2, 0.1, 0]} fontSize={0.15} color="#fff">
           [Clic] Leer Expediente
         </Text>
       )}
+    </group>
+  );
+};
+
+const UnstableDeskLight = () => {
+  const light = useRef();
+  const nextFailure = useRef(4);
+  const failureEnds = useRef(0);
+
+  useFrame(({ clock }) => {
+    const time = clock.getElapsedTime();
+    if (time > nextFailure.current) {
+      failureEnds.current = time + 0.08 + Math.random() * 0.22;
+      nextFailure.current = time + 4 + Math.random() * 9;
+    }
+    const failing = time < failureEnds.current;
+    const flutter = failing ? (Math.sin(time * 95) > 0.12 ? 0.16 : 0.55) : 1;
+    const naturalVariation = 0.95 + Math.sin(time * 1.8) * 0.025;
+    if (light.current) {
+      light.current.intensity = THREE.MathUtils.lerp(light.current.intensity, 1050 * flutter * naturalVariation, 0.16);
+    }
+  });
+
+  return (
+    <group>
+      <spotLight
+        ref={light}
+        position={[0.6, 5, 1.4]}
+        angle={0.72}
+        penumbra={0.72}
+        intensity={1050}
+        color="#ffd59a"
+        castShadow
+        shadow-mapSize={[2048, 2048]}
+        shadow-bias={-0.0002}
+        decay={2}
+        distance={16}
+      />
+      <pointLight position={[0.6, 4.72, 1.4]} intensity={8} distance={3} color="#ffbd68" />
+      <mesh position={[0.6, 4.7, 1.4]}>
+        <sphereGeometry args={[0.16, 16, 16]} />
+        <meshBasicMaterial color="#ffe2ad" />
+      </mesh>
     </group>
   );
 };
@@ -169,8 +299,7 @@ const CameraController = ({ target, onReachedTarget }) => {
 // ---- 2D Overlays ----
 const DocumentOverlay = ({ onClose }) => (
   <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-700">
-    <div className="relative w-full max-w-2xl bg-[#d4cbb3] text-[#1a1a1a] p-8 md:p-12 shadow-[0_0_100px_rgba(0,0,0,1)] overflow-y-auto max-h-[90vh] font-typewriter rounded-sm border-l-8 border-[#3b5998]" 
-         style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/cream-paper.png")' }}>
+    <div className="classified-paper relative w-full max-w-2xl text-[#1a1a1a] p-8 md:p-12 shadow-[0_0_100px_rgba(0,0,0,1)] overflow-y-auto max-h-[90vh] font-typewriter rounded-sm border-l-8 border-[#3b5998]">
       
       <div className="absolute top-4 right-4 border-4 border-[#600000] text-[#600000] px-3 py-1 font-bold text-2xl rotate-[12deg] opacity-80 mix-blend-multiply">
         CLASIFICADO
@@ -245,21 +374,11 @@ export default function DesktopScene() {
           <color attach="background" args={['#010101']} />
           <fog attach="fog" args={['#010101', 3, 12]} />
           
-          <ambientLight intensity={0.5} />
-          
-          {/* Lámpara de techo intensa apuntando al escritorio */}
-          <spotLight 
-            position={[0, 5, 0]} 
-            angle={0.8} 
-            penumbra={0.5} 
-            intensity={5000} 
-            color="#fff4e0" 
-            castShadow 
-            shadow-mapSize={[2048, 2048]}
-            shadow-bias={-0.0001}
-            decay={2}
-            distance={20}
-          />
+          <ambientLight intensity={0.16} color="#8ba0c2" />
+          <hemisphereLight args={['#526279', '#160b08', 0.34]} />
+          <UnstableDeskLight />
+          {/* Rebote frío mínimo para conservar lectura en las zonas oscuras */}
+          <pointLight position={[-5, 1.5, -1]} intensity={13} distance={7} color="#38506d" />
 
           <Room />
           <Desk />
