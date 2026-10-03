@@ -70,22 +70,22 @@ const DocumentFolder = ({ onClick, isZooming }) => {
   const [hovered, setHovered] = useState(false);
   useCursor(hovered && !isZooming);
   return (
-    <group position={[1.5, 0.01, 0.5]} rotation={[-Math.PI / 2, 0, -0.1]} onClick={!isZooming ? onClick : null} onPointerOver={() => setHovered(true)} onPointerOut={() => setHovered(false)}>
+    <group position={[1.5, 0.02, 0.5]} rotation={[-Math.PI / 2, 0, -0.1]} onClick={!isZooming ? onClick : null} onPointerOver={() => setHovered(true)} onPointerOut={() => setHovered(false)}>
       {/* Sombra de contacto */}
       <Plane args={[1.6, 2.1]} position={[0, 0, -0.01]}>
         <meshBasicMaterial color="#000" opacity={0.5} transparent />
       </Plane>
       
-      <Plane args={[1.2, 1.6]} position={[0, 0, 0]} castShadow receiveShadow>
+      <Plane args={[1.2, 1.6]} position={[0, 0, 0.01]} castShadow receiveShadow>
         <meshStandardMaterial color="#2d426b" roughness={0.7} />
       </Plane>
-      <Plane args={[1.1, 1.5]} position={[0.05, 0, 0.01]} receiveShadow>
+      <Plane args={[1.1, 1.5]} position={[0.05, 0, 0.03]} receiveShadow>
         <meshStandardMaterial color="#d4cbb3" roughness={1} />
       </Plane>
       <Plane args={[1.1, 1.6]} position={[-0.05, 0, 0.02]} receiveShadow castShadow>
         <meshStandardMaterial color="#3b5998" roughness={0.8} />
       </Plane>
-      <Text position={[0, 0, 0.03]} rotation={[0, 0, Math.PI / 2]} fontSize={0.15} color="#600000">
+      <Text position={[0, 0, 0.05]} rotation={[0, 0, Math.PI / 2]} fontSize={0.15} color="#600000">
         CONFIDENCIAL
       </Text>
       {hovered && !isZooming && (
