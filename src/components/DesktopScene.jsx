@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Box, Plane, Text, useCursor } from '@react-three/drei';
-import { EffectComposer, Bloom, Noise, Vignette, ChromaticAberration } from '@react-three/postprocessing';
-import { BlendFunction } from 'postprocessing';
 import * as THREE from 'three';
 import InvestigationFiles from './InvestigationFiles.jsx';
 
@@ -276,18 +274,6 @@ export default function DesktopScene() {
             }} 
           />
 
-          {/* Post-Processing Pipeline (El efecto Outlast) */}
-          <EffectComposer disableNormalPass>
-            <Bloom 
-              luminanceThreshold={0.5} 
-              luminanceSmoothing={0.9} 
-              intensity={1.5} 
-              kernelSize={3}
-            />
-            <Noise opacity={0.3} blendFunction={BlendFunction.OVERLAY} />
-            <Vignette eskil={false} offset={0.3} darkness={0.8} />
-            <ChromaticAberration offset={[0.002, 0.002]} />
-          </EffectComposer>
         </Canvas>
       </div>
 
