@@ -606,7 +606,7 @@ export default function DesktopScene() {
   return (
     <div className="w-screen h-screen relative bg-black overflow-hidden cursor-crosshair">
       <div className="w-full h-full">
-        <Canvas shadows camera={{ position: [0, 3.5, 4], fov: 60 }}>
+        <Canvas camera={{ position: [0, 3.5, 4], fov: 60 }}>
           <color attach="background" args={['#010101']} />
           <fog attach="fog" args={['#010101', 3, 12]} />
 
