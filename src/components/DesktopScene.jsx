@@ -638,3 +638,7 @@ export default function DesktopScene() {
     </div>
   );
 }
+
+useGLTF.preload('/assets/models/old_table.glb');
+useGLTF.preload('/assets/models/keyboard.glb');
+useGLTF.preload('/assets/models/low_poly_outlast_camera.glb');
