@@ -202,22 +202,26 @@ const DeskScratches = () => {
 };
 
 const Desk = () => {
-  const { scene } = useGLTF('/assets/models/old_table.glb');
-  const desk = useMemo(() => scene.clone(true), [scene]);
-
-  useEffect(() => {
-    desk.traverse((object) => {
-      if (!object.isMesh) return;
-      object.castShadow = true;
-      object.receiveShadow = true;
-    });
-  }, [desk]);
+  const woodTexture = useMemo(() => makeTexture('wood'), []);
+  useEffect(() => () => woodTexture.dispose(), [woodTexture]);
 
   return (
     <group>
-      <Center top position={[0, 0.04, 0]}>
-        <primitive object={desk} scale={1} />
-      </Center>
+      {/* Tabla de madera pesada, con canto y patas visibles en la penumbra */}
+      <RoundedBox args={[14, 0.48, 6]} radius={0.07} smoothness={3} position={[0, -0.2, 0]} receiveShadow castShadow>
+        <meshStandardMaterial map={woodTexture} color="#76583c" roughness={0.91} metalness={0} />
+      </RoundedBox>
+      <Box args={[14.08, 0.2, 0.22]} position={[0, -0.47, 2.92]} castShadow receiveShadow>
+        <meshStandardMaterial color="#3a1f0f" roughness={0.9} />
+      </Box>
+      {[
+        [-6.15, -2.1, 2.35], [6.15, -2.1, 2.35],
+        [-6.15, -2.1, -2.35], [6.15, -2.1, -2.35]
+      ].map((position, index) => (
+        <Box key={index} args={[0.38, 3.5, 0.38]} position={position} castShadow>
+          <meshStandardMaterial color="#291507" roughness={0.88} />
+        </Box>
+      ))}
       <GrimeLayer />
       <DeskScratches />
       {/* Salpicaduras PNG del paquete aportado, situadas en varias zonas de la cubierta. */}
@@ -639,6 +643,5 @@ export default function DesktopScene() {
   );
 }
 
-useGLTF.preload('/assets/models/old_table.glb');
 useGLTF.preload('/assets/models/keyboard.glb');
 useGLTF.preload('/assets/models/low_poly_outlast_camera.glb');
