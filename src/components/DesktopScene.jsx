@@ -331,7 +331,7 @@ const UnstableDeskLight = () => {
         intensity={1050}
         color="#ffd59a"
         castShadow
-        shadow-mapSize={[2048, 2048]}
+        shadow-mapSize={[1024, 1024]}
         shadow-bias={-0.0002}
         decay={2}
         distance={16}
