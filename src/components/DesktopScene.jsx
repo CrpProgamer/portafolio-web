@@ -47,9 +47,200 @@ const AsylumDoor = () => (
     <Text position={[0, 2.15, 0.13]} fontSize={0.09} color="#e6dec8">
       PABELLÓN D // CONSULTA 04
     </Text>
-    {/* Haz frío de luz que se filtra por debajo y por la mirilla desde el pasillo exterior */}
-    <pointLight position={[0, -2.1, 0.4]} intensity={5.5} distance={3.8} color="#45709b" />
-    <pointLight position={[0, 0.9, 0.3]} intensity={2.8} distance={2.5} color="#45709b" />
+    {/* Haz frío de luz que se filtra por debajo y por la mirilla desde el pasillo exterior del pabellón */}
+    <pointLight position={[0, -2.1, 0.4]} intensity={4.5} distance={3.8} color="#1d4d3d" />
+    <pointLight position={[0, 0.9, 0.3]} intensity={2.4} distance={2.5} color="#5e1212" />
+  </group>
+);
+
+const AsylumExitSign = ({ position = [6.2, 1.95, -5.12] }) => {
+  const lightRef = useRef();
+  useFrame(({ clock }) => {
+    const time = clock.getElapsedTime();
+    if (lightRef.current) {
+      // Oscilación tenue y zumbido del letrero de salida de emergencia
+      const flicker = Math.sin(time * 8.5) > 0.86 ? 0.35 : (0.85 + Math.sin(time * 2.8) * 0.15);
+      lightRef.current.intensity = 2.4 * flicker;
+    }
+  });
+
+  return (
+    <group position={position}>
+      {/* Carcasa de chapa oxidada */}
+      <Box args={[1.2, 0.46, 0.16]} castShadow>
+        <meshStandardMaterial color="#1a1c1a" roughness={0.7} metalness={0.6} />
+      </Box>
+      {/* Pantalla difusora con rótulo de salida iluminado */}
+      <Plane args={[1.05, 0.36]} position={[0, 0, 0.086]}>
+        <meshBasicMaterial color="#300505" />
+      </Plane>
+      <Text position={[0, 0, 0.092]} fontSize={0.18} color="#ff3333" letterSpacing={0.12}>
+        SALIDA
+      </Text>
+      <pointLight ref={lightRef} position={[0, -0.1, 0.25]} intensity={2.4} distance={3.8} color="#aa1515" />
+    </group>
+  );
+};
+
+const BloodWallWritings = () => (
+  <group>
+    {/* Mensaje central icónico en la pared del fondo sobre el escritorio (estilo Padre Martin / pacientes) */}
+    <group position={[-1.2, 3.8, -5.14]}>
+      <Text fontSize={0.36} color="#380303" letterSpacing={0.08} anchorX="center" anchorY="middle">
+        EL WALRIDER NOS OBSERVA
+      </Text>
+      {/* Chorretones de sangre escurriendo por la pared como dedos arrastrados */}
+      {[-1.9, -0.8, 0.2, 1.4].map((x, i) => (
+        <Box key={i} args={[0.024, 0.45 + (i % 2) * 0.35, 0.01]} position={[x, -0.32, 0.005]}>
+          <meshBasicMaterial color="#2d0202" opacity={0.82} transparent />
+        </Box>
+      ))}
+    </group>
+
+    {/* Mensaje en la pared lateral izquierda junto al conducto de ventilación */}
+    <group position={[-9.43, 0.8, -2.8]} rotation={[0, Math.PI / 2, 0]}>
+      <Text fontSize={0.3} color="#360202" letterSpacing={0.06} anchorX="center" anchorY="middle">
+        NO HAY SALIDA
+      </Text>
+      <Text position={[0, -0.4, 0]} fontSize={0.18} color="#2b0202" letterSpacing={0.04} anchorX="center" anchorY="middle">
+        PURIFICACIÓN POR SANGRE
+      </Text>
+      {[-0.8, 0.6].map((x, i) => (
+        <Box key={i} args={[0.02, 0.5, 0.01]} position={[x, -0.25, 0.005]}>
+          <meshBasicMaterial color="#290202" opacity={0.78} transparent />
+        </Box>
+      ))}
+    </group>
+
+    {/* Inscripción conspirativa de Murkoff cerca del archivador */}
+    <group position={[4.6, -1.8, -5.14]}>
+      <Text fontSize={0.16} color="#2e0202" letterSpacing={0.05} anchorX="center" anchorY="middle">
+        MURKOFF MIENTE // TERAPIA MORFOGÉNICA
+      </Text>
+    </group>
+  </group>
+);
+
+const FlickeringFluorescentFixture = ({ position = [0, 5.05, 0.8], isCamcorderActive = false }) => {
+  const lightRef = useRef();
+  const tubeMatRef = useRef();
+
+  useFrame(({ clock }) => {
+    if (isCamcorderActive) {
+      if (lightRef.current) lightRef.current.intensity = 0;
+      if (tubeMatRef.current) tubeMatRef.current.emissiveIntensity = 0.05;
+      return;
+    }
+
+    const time = clock.getElapsedTime();
+    // Zumbido eléctrico y oscilación de tubo fluorescente de hospital psiquiátrico
+    const hum = Math.sin(time * 55) * 0.08 + Math.cos(time * 26) * 0.05;
+    // Cortes repentinos por sobretensión / balastro dañado
+    const dip = Math.sin(time * 1.9) > 0.92 ? 0.32 : 1.0;
+    const spark = Math.random() < 0.014 ? 0.12 : 1.0;
+    const factor = Math.max(0.08, (1 + hum) * dip * spark);
+
+    if (lightRef.current) {
+      lightRef.current.intensity = THREE.MathUtils.lerp(lightRef.current.intensity, 420 * factor, 0.22);
+    }
+    if (tubeMatRef.current) {
+      tubeMatRef.current.emissiveIntensity = THREE.MathUtils.lerp(tubeMatRef.current.emissiveIntensity, 1.35 * factor, 0.22);
+    }
+  });
+
+  return (
+    <group position={position}>
+      {/* Armazón metálico suspendido con pátina y óxido */}
+      <Box args={[3.8, 0.16, 0.55]} castShadow>
+        <meshStandardMaterial color="#1a1d1b" roughness={0.75} metalness={0.65} />
+      </Box>
+      {/* Cables / tirantes de fijación al techo */}
+      {[-1.6, 1.6].map((x, i) => (
+        <Box key={i} args={[0.02, 0.2, 0.02]} position={[x, 0.15, 0]}>
+          <meshStandardMaterial color="#0b0d0c" metalness={0.9} roughness={0.2} />
+        </Box>
+      ))}
+      {/* Tubos fluorescentes dobles */}
+      {[-0.12, 0.12].map((z, i) => (
+        <mesh key={i} position={[0, -0.1, z]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.032, 0.032, 3.4, 12]} />
+          <meshStandardMaterial
+            ref={i === 0 ? tubeMatRef : null}
+            color="#8fa37e"
+            emissive="#a6bfa0"
+            emissiveIntensity={1.2}
+            roughness={0.3}
+          />
+        </mesh>
+      ))}
+      {/* Rejilla de protección industrial */}
+      <Box args={[3.6, 0.02, 0.48]} position={[0, -0.16, 0]}>
+        <meshStandardMaterial color="#2d332f" metalness={0.8} roughness={0.4} wireframe />
+      </Box>
+      {/* Foco de luz verdosa sucia institucional */}
+      <spotLight
+        ref={lightRef}
+        position={[0, -0.2, 0]}
+        target-position={[0, -4, 0]}
+        angle={1.15}
+        penumbra={0.85}
+        intensity={420}
+        distance={14}
+        color="#8da57a"
+        castShadow
+        shadow-mapSize={[512, 512]}
+        shadow-bias={-0.0003}
+      />
+    </group>
+  );
+};
+
+const PsychiatricMedsDebris = () => (
+  <group>
+    {/* Frasco de sedantes psiquiátricos volcado sobre la mesa */}
+    <group position={[0.95, 0.1, 0.85]} rotation={[0, 0.35, Math.PI / 2]}>
+      {/* Frasco translúcido ámbar */}
+      <mesh castShadow receiveShadow>
+        <cylinderGeometry args={[0.075, 0.075, 0.22, 16]} />
+        <meshStandardMaterial color="#8a4f15" roughness={0.3} metalness={0.1} transparent opacity={0.78} />
+      </mesh>
+      {/* Tapón blanco de seguridad */}
+      <mesh position={[0, 0.12, 0]} castShadow>
+        <cylinderGeometry args={[0.082, 0.082, 0.04, 16]} />
+        <meshStandardMaterial color="#ddd9ce" roughness={0.4} />
+      </mesh>
+      {/* Etiqueta rasgada de Murkoff Pharmaceuticals */}
+      <mesh position={[0, -0.01, 0]}>
+        <cylinderGeometry args={[0.076, 0.076, 0.14, 16, 1, true, 0, Math.PI * 1.5]} />
+        <meshStandardMaterial color="#ded7bf" roughness={0.9} side={THREE.DoubleSide} />
+      </mesh>
+    </group>
+
+    {/* Pastillas y cápsulas blancas desparramadas sobre la mesa de madera */}
+    {[
+      [0.82, 0.08, 0.68], [0.72, 0.08, 0.82], [1.14, 0.08, 0.95],
+      [0.65, 0.08, 0.98], [0.88, 0.08, 1.1]
+    ].map(([x, y, z], i) => (
+      <mesh key={i} position={[x, y, z]} castShadow>
+        <sphereGeometry args={[0.018, 8, 8]} />
+        <meshStandardMaterial color="#f0ede1" roughness={0.5} />
+      </mesh>
+    ))}
+
+    {/* Bandeja metálica quirúrgica con instrumental clínico oxidado */}
+    <group position={[2.9, 0.08, 1.25]} rotation={[0, -0.22, 0]}>
+      <RoundedBox args={[0.78, 0.04, 0.44]} radius={0.02} smoothness={2} castShadow receiveShadow>
+        <meshStandardMaterial color="#2d3330" roughness={0.45} metalness={0.75} />
+      </RoundedBox>
+      {/* Mancha de sangre seca dentro de la bandeja */}
+      <Plane args={[0.4, 0.22]} rotation={[-Math.PI / 2, 0, 0.2]} position={[0, 0.022, 0]}>
+        <meshBasicMaterial color="#350404" transparent opacity={0.7} />
+      </Plane>
+      {/* Bisturí / pinzas de metal */}
+      <Box args={[0.32, 0.012, 0.025]} position={[-0.1, 0.028, 0.04]} rotation={[0, 0.15, 0]} castShadow>
+        <meshStandardMaterial color="#9ea3a0" metalness={0.9} roughness={0.2} />
+      </Box>
+    </group>
   </group>
 );
 
@@ -230,11 +421,11 @@ const CamcorderIRSpotlight = ({ active, zoom = 1.0 }) => {
   );
 };
 
-const Room = () => (
+const Room = ({ isCamcorderActive = false }) => (
   <group>
-    {/* Suelo: Baldosas clínicas institucionales de hospital */}
+    {/* Suelo: Baldosas clínicas institucionales de hospital manchadas y desgastadas */}
     <Plane args={[20, 14]} rotation={[-Math.PI / 2, 0, 0]} position={[0, -4, 1.2]} receiveShadow>
-      <meshStandardMaterial color="#0c0e0d" roughness={0.82} metalness={0.15} />
+      <meshStandardMaterial color="#0c0e0d" roughness={0.84} metalness={0.15} />
     </Plane>
 
     {/* Techo completamente cerrado: Placas acústicas industriales */}
@@ -242,51 +433,60 @@ const Room = () => (
       <meshStandardMaterial color="#080a09" roughness={0.95} />
     </Plane>
 
-    {/* Lámparas fluorescentes industriales suspendidas en el techo */}
-    {[-3, 3].map((x, i) => (
-      <group key={i} position={[x, 5.05, 1.2]}>
-        <Box args={[3.6, 0.16, 0.6]} castShadow>
-          <meshStandardMaterial color="#181b19" roughness={0.5} metalness={0.7} />
-        </Box>
-        {/* Rejilla de protección */}
-        <Box args={[3.4, 0.02, 0.52]} position={[0, -0.09, 0]}>
-          <meshStandardMaterial color="#303532" metalness={0.85} roughness={0.3} />
-        </Box>
-      </group>
-    ))}
+    {/* Lámparas fluorescentes parpadeantes de hospital con luz verdosa sucia */}
+    <FlickeringFluorescentFixture position={[0, 5.05, 0.8]} isCamcorderActive={isCamcorderActive} />
+    <FlickeringFluorescentFixture position={[-4.5, 5.05, -1.8]} isCamcorderActive={isCamcorderActive} />
 
-    {/* Pared Frontal */}
+    {/* Pared Frontal con suciedad acumulada */}
     <Plane args={[20, 9.4]} position={[0, 0.6, -5.2]} receiveShadow>
-      <meshStandardMaterial color="#121815" roughness={0.88} />
+      <meshStandardMaterial color="#0f1512" roughness={0.9} />
     </Plane>
     {/* Zócalo pared frontal */}
     <Box args={[20, 0.35, 0.1]} position={[0, -3.85, -5.15]} receiveShadow>
-      <meshStandardMaterial color="#090b0a" roughness={0.7} metalness={0.3} />
+      <meshStandardMaterial color="#070908" roughness={0.7} metalness={0.3} />
     </Box>
 
     {/* Pared Trasera */}
     <Plane args={[20, 9.4]} rotation={[0, Math.PI, 0]} position={[0, 0.6, 7.5]} receiveShadow>
-      <meshStandardMaterial color="#0d110f" roughness={0.92} />
+      <meshStandardMaterial color="#0c100e" roughness={0.92} />
     </Plane>
     <Box args={[20, 0.35, 0.1]} position={[0, -3.85, 7.45]} receiveShadow>
-      <meshStandardMaterial color="#090b0a" roughness={0.7} metalness={0.3} />
+      <meshStandardMaterial color="#070908" roughness={0.7} metalness={0.3} />
     </Box>
 
     {/* Pared Izquierda */}
     <Plane args={[14, 9.4]} rotation={[0, Math.PI / 2, 0]} position={[-9.5, 0.6, 1.2]} receiveShadow>
-      <meshStandardMaterial color="#101412" roughness={0.9} />
+      <meshStandardMaterial color="#0e1310" roughness={0.9} />
     </Plane>
     <Box args={[0.1, 0.35, 14]} position={[-9.45, -3.85, 1.2]} receiveShadow>
-      <meshStandardMaterial color="#090b0a" roughness={0.7} metalness={0.3} />
+      <meshStandardMaterial color="#070908" roughness={0.7} metalness={0.3} />
     </Box>
 
     {/* Pared Derecha */}
     <Plane args={[14, 9.4]} rotation={[0, -Math.PI / 2, 0]} position={[9.5, 0.6, 1.2]} receiveShadow>
-      <meshStandardMaterial color="#101412" roughness={0.9} />
+      <meshStandardMaterial color="#0e1310" roughness={0.9} />
     </Plane>
     <Box args={[0.1, 0.35, 14]} position={[9.45, -3.85, 1.2]} receiveShadow>
-      <meshStandardMaterial color="#090b0a" roughness={0.7} metalness={0.3} />
+      <meshStandardMaterial color="#070908" roughness={0.7} metalness={0.3} />
     </Box>
+
+    {/* Rótulo de SALIDA iluminado en rojo sobre la puerta pesada */}
+    <AsylumExitSign position={[6.2, 1.95, -5.12]} />
+
+    {/* Mensajes en sangre de pacientes / Padre Martin sobre los muros */}
+    <BloodWallWritings />
+
+    {/* Regueros de sangre, salpicaduras y marcas de arrastre estilo Outlast */}
+    <Suspense fallback={null}>
+      {/* Rastro de arrastre que sale por debajo de la puerta hacia el pasillo */}
+      <BloodTextureStain file="bloodslash_heavy.png" position={[6.2, -3.97, -3.6]} rotation={1.57} size={[3.2, 1.8]} opacity={0.75} />
+      {/* Salpicaduras de sangre en la pared cerca de la puerta */}
+      <BloodTextureStain file="bloodspray.png" position={[5.2, 0.4, -5.13]} planeRotation={[0, 0, 0.25]} size={[2.2, 1.4]} opacity={0.65} />
+      {/* Mancha y salpicón vertical en la pared detrás del escritorio */}
+      <BloodTextureStain file="bloodslash1.png" position={[-1.2, 2.6, -5.13]} planeRotation={[0, 0, -0.15]} size={[2.4, 1.3]} opacity={0.68} />
+      {/* Charco bajo la peana del esqueleto anatómico */}
+      <BloodTextureStain file="bloodsplat.png" position={[-7.6, -3.97, -3.8]} rotation={0.4} size={[2.4, 1.5]} opacity={0.65} />
+    </Suspense>
 
     {/* Elementos arquitectónicos y de atrezo de la oficina */}
     <AsylumDoor />
@@ -412,7 +612,7 @@ const BloodStain = ({ position, rotation = 0, size = [1.4, 0.7], opacity = 0.82 
   );
 };
 
-const BloodTextureStain = ({ file, position, rotation = 0, size, opacity = 1 }) => {
+const BloodTextureStain = ({ file, position, rotation = 0, planeRotation = null, size, opacity = 1 }) => {
   const sourceTexture = useTexture(`/assets/textures/BlueRoseSonata%20Blood%20FX%20Pack/${file}`);
   const texture = useMemo(() => {
     const image = sourceTexture.image;
@@ -438,8 +638,11 @@ const BloodTextureStain = ({ file, position, rotation = 0, size, opacity = 1 }) 
     return processed;
   }, [sourceTexture]);
   useEffect(() => () => texture.dispose(), [texture]);
+
+  const finalRotation = planeRotation || [-Math.PI / 2, 0, rotation];
+
   return (
-    <Plane args={size} rotation={[-Math.PI / 2, 0, rotation]} position={position}>
+    <Plane args={size} rotation={finalRotation} position={position}>
       <meshBasicMaterial map={texture} transparent opacity={opacity} depthWrite={false} side={THREE.DoubleSide} />
     </Plane>
   );
@@ -500,6 +703,8 @@ const Desk = () => {
       <BloodTextureStain file="bloodspray.png" position={[-3.75, 0.081, -0.52]} rotation={0.48} size={[2.2, 1.24]} opacity={0.56} />
       <BloodTextureStain file="bloodsplat.png" position={[4.05, 0.081, -1.4]} rotation={-0.1} size={[2.15, 1.2]} opacity={0.6} />
       <BloodTextureStain file="bloodslash2.png" position={[4.65, 0.081, 1.42]} rotation={0.62} size={[1.7, 0.96]} opacity={0.58} />
+      {/* Atrezo psiquiátrico de Mount Massive: frasco de sedantes volcado, pastillas y bandeja clínica */}
+      <PsychiatricMedsDebris />
     </group>
   );
 };
@@ -579,42 +784,44 @@ const DocumentFolder = ({ onClick, isZooming }) => {
 
 const UnstableDeskLight = () => {
   const light = useRef();
-  const nextFailure = useRef(4);
+  const nextFailure = useRef(3.5);
   const failureEnds = useRef(0);
 
   useFrame(({ clock }) => {
     const time = clock.getElapsedTime();
     if (time > nextFailure.current) {
-      failureEnds.current = time + 0.08 + Math.random() * 0.22;
-      nextFailure.current = time + 4 + Math.random() * 9;
+      failureEnds.current = time + 0.08 + Math.random() * 0.24;
+      nextFailure.current = time + 3.5 + Math.random() * 7;
     }
     const failing = time < failureEnds.current;
-    const flutter = failing ? (Math.sin(time * 95) > 0.12 ? 0.16 : 0.55) : 1;
-    const naturalVariation = 0.95 + Math.sin(time * 1.8) * 0.025;
+    // Caída violenta de tensión y micro-parpadeo sucio de lámpara hospitalaria
+    const flutter = failing ? (Math.sin(time * 110) > 0.08 ? 0.12 : 0.48) : 1;
+    const naturalVariation = 0.94 + Math.sin(time * 2.1) * 0.035;
     if (light.current) {
-      light.current.intensity = THREE.MathUtils.lerp(light.current.intensity, 1050 * flutter * naturalVariation, 0.16);
+      light.current.intensity = THREE.MathUtils.lerp(light.current.intensity, 980 * flutter * naturalVariation, 0.2);
     }
   });
 
   return (
     <group>
+      {/* Bombilla incandescente sucia de filamento con luz amarillenta-verdosa amortiguada */}
       <spotLight
         ref={light}
         position={[0.6, 5, 1.4]}
-        angle={0.72}
-        penumbra={0.72}
-        intensity={1050}
-        color="#ffd59a"
+        angle={0.75}
+        penumbra={0.78}
+        intensity={980}
+        color="#baa05b"
         castShadow
         shadow-mapSize={[1024, 1024]}
         shadow-bias={-0.0002}
         decay={2}
         distance={16}
       />
-      <pointLight position={[0.6, 4.72, 1.4]} intensity={8} distance={3} color="#ffbd68" />
+      <pointLight position={[0.6, 4.72, 1.4]} intensity={7.5} distance={3} color="#948245" />
       <mesh position={[0.6, 4.7, 1.4]}>
         <sphereGeometry args={[0.16, 16, 16]} />
-        <meshBasicMaterial color="#ffe2ad" />
+        <meshBasicMaterial color="#bfa767" />
       </mesh>
     </group>
   );
@@ -761,56 +968,77 @@ const Mouse = () => (
   </group>
 );
 
-const FloatingDust = () => {
+const FloatingDust = ({ isCamcorderActive = false }) => {
   const dustData = useMemo(() => {
-    const positions = new Float32Array(125 * 3);
-    const base = new Float32Array(125 * 3);
-    const speeds = new Float32Array(125);
+    const count = 220;
+    const positions = new Float32Array(count * 3);
+    const base = new Float32Array(count * 3);
+    const speeds = new Float32Array(count);
     for (let i = 0; i < positions.length; i += 3) {
-      const y = 0.3 + Math.random() * 3.9;
-      const radius = 0.18 + (5 - y) * 0.16;
-      base[i] = 0.6 + (Math.random() - 0.5) * radius * 2;
+      const y = -0.5 + Math.random() * 4.6;
+      base[i] = (Math.random() - 0.5) * 8.5;
       base[i + 1] = y;
-      base[i + 2] = 1.4 + (Math.random() - 0.5) * radius * 1.35;
+      base[i + 2] = 0.5 + (Math.random() - 0.5) * 6;
       positions[i] = base[i];
       positions[i + 1] = base[i + 1];
       positions[i + 2] = base[i + 2];
-      speeds[i / 3] = 0.15 + Math.random() * 0.32;
+      speeds[i / 3] = 0.12 + Math.random() * 0.28;
     }
     const canvas = document.createElement('canvas');
     canvas.width = canvas.height = 64;
     const ctx = canvas.getContext('2d');
     const glow = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-    glow.addColorStop(0, 'rgba(255, 245, 220, 0.8)');
-    glow.addColorStop(0.25, 'rgba(255, 245, 220, 0.3)');
-    glow.addColorStop(1, 'rgba(255, 245, 220, 0)');
+    glow.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+    glow.addColorStop(0.3, 'rgba(255, 255, 255, 0.4)');
+    glow.addColorStop(1, 'rgba(255, 255, 255, 0)');
     ctx.fillStyle = glow;
     ctx.fillRect(0, 0, 64, 64);
     const sprite = new THREE.CanvasTexture(canvas);
     return { positions, base, speeds, sprite };
   }, []);
+
   const dust = useRef();
   const geometry = useRef();
+  const matRef = useRef();
+
   useFrame(({ clock }) => {
     if (geometry.current) {
       const time = clock.getElapsedTime();
       const positions = geometry.current.attributes.position.array;
       for (let i = 0; i < positions.length; i += 3) {
         const speed = dustData.speeds[i / 3];
-        positions[i] = dustData.base[i] + Math.sin(time * speed + i) * 0.08;
-        positions[i + 1] = dustData.base[i + 1] + Math.sin(time * speed * 0.7 + i * 0.3) * 0.13;
-        positions[i + 2] = dustData.base[i + 2] + Math.cos(time * speed * 0.8 + i) * 0.06;
+        positions[i] = dustData.base[i] + Math.sin(time * speed + i) * 0.1;
+        positions[i + 1] = dustData.base[i + 1] + Math.sin(time * speed * 0.7 + i * 0.3) * 0.16;
+        positions[i + 2] = dustData.base[i + 2] + Math.cos(time * speed * 0.8 + i) * 0.08;
       }
       geometry.current.attributes.position.needsUpdate = true;
     }
+
+    if (matRef.current) {
+      const targetColor = isCamcorderActive ? new THREE.Color('#78f59d') : new THREE.Color('#c2b48a');
+      matRef.current.color.lerp(targetColor, 0.1);
+      matRef.current.opacity = isCamcorderActive ? 0.38 : 0.18;
+    }
   });
+
   useEffect(() => () => dustData.sprite.dispose(), [dustData]);
+
   return (
     <points ref={dust}>
       <bufferGeometry ref={geometry}>
         <bufferAttribute attach="attributes-position" args={[dustData.positions, 3]} />
       </bufferGeometry>
-      <pointsMaterial map={dustData.sprite} color="#f3dcad" size={0.023} transparent opacity={0.22} alphaTest={0.02} depthWrite={false} sizeAttenuation />
+      <pointsMaterial
+        ref={matRef}
+        map={dustData.sprite}
+        color="#c2b48a"
+        size={0.032}
+        transparent
+        opacity={0.18}
+        alphaTest={0.01}
+        depthWrite={false}
+        sizeAttenuation
+      />
     </points>
   );
 };
@@ -829,14 +1057,13 @@ const Clutter = () => (
   </group>
 );
 
-// ---- Camera Controller (Breathing, Mouse Look & Dynamic Optical Zoom) ----
+// ---- Camera Controller (Breathing, Fear Tremor, Mouse Look & Dynamic Optical Zoom) ----
 const CameraController = ({ target, onReachedTarget, isCamcorderActive, zoomLevel = 1.0 }) => {
   const { camera, clock } = useThree();
   const basePos = new THREE.Vector3(0, 3.5, 4);
 
   useFrame((state) => {
     const time = clock.getElapsedTime();
-    const breathing = Math.sin(time * 1.5) * 0.05; // Efecto respiración
 
     // Zoom óptico analógico dinámico: reduce el FOV para ampliar la vista como en Outlast
     const baseFov = 60;
@@ -850,10 +1077,18 @@ const CameraController = ({ target, onReachedTarget, isCamcorderActive, zoomLeve
       const targetX = (state.pointer.x * Math.PI) / 5;
       const targetY = (state.pointer.y * Math.PI) / 8 - 0.2;
 
-      camera.rotation.y = THREE.MathUtils.lerp(camera.rotation.y, -targetX, 0.05);
-      camera.rotation.x = THREE.MathUtils.lerp(camera.rotation.x, targetY, 0.05);
+      // Temblor de pulso nervioso y miedo al sostener la cámara (Outlast handheld camera jitter)
+      const tremorX = isCamcorderActive ? (Math.sin(time * 24) * 0.0035 + Math.cos(time * 38) * 0.002) : 0;
+      const tremorY = isCamcorderActive ? (Math.cos(time * 20) * 0.0035 + Math.sin(time * 34) * 0.002) : 0;
 
-      // Aplicar respiración a la posición
+      camera.rotation.y = THREE.MathUtils.lerp(camera.rotation.y, -targetX + tremorX, 0.05);
+      camera.rotation.x = THREE.MathUtils.lerp(camera.rotation.x, targetY + tremorY, 0.05);
+
+      // Respiración más agitada e irregular en visión nocturna
+      const breathIntensity = isCamcorderActive ? 0.065 : 0.04;
+      const breathSpeed = isCamcorderActive ? 2.1 : 1.4;
+      const breathing = Math.sin(time * breathSpeed) * breathIntensity;
+
       const targetPos = basePos.clone();
       targetPos.y += breathing;
       camera.position.lerp(targetPos, 0.05);
@@ -940,6 +1175,7 @@ export default function DesktopScene() {
   const [animatingTo, setAnimatingTo] = useState('none');
   const [activeOverlay, setActiveOverlay] = useState('none');
   const [isCamcorderActive, setIsCamcorderActive] = useState(false);
+  const [isCameraOnDesk, setIsCameraOnDesk] = useState(true);
   const [isCameraTransitioning, setIsCameraTransitioning] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1.0);
 
@@ -961,23 +1197,36 @@ export default function DesktopScene() {
         pickupSound.play().catch(() => {});
       } catch (err) {}
 
+      // La cámara física desaparece de la mesa de inmediato al ser agarrada
+      setIsCameraOnDesk(false);
+
       // Activar efecto cinemático de parpadeo a negro de 1 segundo
       setIsCameraTransitioning(true);
-      setIsCamcorderActive(true);
-      setZoomLevel(1.0); // Reset de zoom al coger la cámara
+
+      // Activar la visión nocturna en el punto de oscuridad total (400ms)
+      setTimeout(() => {
+        setIsCamcorderActive(true);
+        setZoomLevel(1.0);
+      }, 400);
 
       setTimeout(() => {
         setIsCameraTransitioning(false);
       }, 950);
     } else {
-      // Bajar la videocámara
+      // Bajar la videocámara (dejar de usar la cámara)
       setIsCameraTransitioning(true);
-      setIsCamcorderActive(false);
-      setZoomLevel(1.0);
+
+      // La cámara física reaparece en la mesa y se apaga el modo nocturno ÚNICAMENTE
+      // cuando la pantalla está al 100% en negro (450ms), evitando que aparezca antes
+      setTimeout(() => {
+        setIsCamcorderActive(false);
+        setIsCameraOnDesk(true);
+        setZoomLevel(1.0);
+      }, 450);
 
       setTimeout(() => {
         setIsCameraTransitioning(false);
-      }, 400);
+      }, 950);
     }
   };
 
@@ -1016,32 +1265,32 @@ export default function DesktopScene() {
     <div className="w-screen h-screen relative bg-black overflow-hidden cursor-crosshair">
       <div className="w-full h-full">
         <Canvas camera={{ position: [0, 3.5, 4], fov: 60 }}>
-          <color attach="background" args={['#010101']} />
-          <fog attach="fog" args={['#010101', 3, isCamcorderActive ? 18 : 14]} />
+          <color attach="background" args={['#020403']} />
+          <fog attach="fog" args={['#020403', 2.5, isCamcorderActive ? 18 : 13]} />
 
-          {/* En visión nocturna, las luces ambientales se reducen a casi cero para crear el contraste terrorífico de Outlast */}
-          <ambientLight intensity={isCamcorderActive ? 0.03 : 0.16} color="#8ba0c2" />
-          <hemisphereLight args={['#526279', '#160b08', isCamcorderActive ? 0.04 : 0.34]} />
+          {/* En visión nocturna, las luces ambientales se reducen al mínimo para el contraste terrorífico de Outlast */}
+          <ambientLight intensity={isCamcorderActive ? 0.015 : 0.08} color="#16221a" />
+          <hemisphereLight args={['#29362c', '#080c09', isCamcorderActive ? 0.02 : 0.22]} />
           {!isCamcorderActive && <UnstableDeskLight />}
 
-          {/* Rebote frío sutil en modo normal */}
+          {/* Rebote sucio y frío estilo hospital psiquiátrico Mount Massive en modo normal */}
           {!isCamcorderActive && (
             <>
-              <pointLight position={[-5, 1.5, -1]} intensity={13} distance={7} color="#38506d" />
-              <pointLight position={[-3.8, 1.15, 0.7]} intensity={16} distance={4.6} color="#d7a76d" />
+              <pointLight position={[-5, 1.5, -1]} intensity={11} distance={6.5} color="#1c3629" />
+              <pointLight position={[-3.8, 1.15, 0.7]} intensity={12} distance={4.5} color="#8a7947" />
             </>
           )}
 
           {/* Linterna Infrarroja (IR Spotlight) que ilumina hacia donde mira el jugador con zoom dinámico */}
           <CamcorderIRSpotlight active={isCamcorderActive} zoom={zoomLevel} />
 
-          <Room />
+          <Room isCamcorderActive={isCamcorderActive} />
           <Suspense fallback={null}>
             <Desk />
             <Monitor onClick={() => handleOpen('terminal')} isZooming={animatingTo !== 'none'} />
             <DocumentFolder onClick={() => handleOpen('document')} isZooming={animatingTo !== 'none'} />
-            {/* La cámara desaparece de la mesa al agarrarla y reaparece al bajarla */}
-            {!isCamcorderActive && (
+            {/* La cámara desaparece al agarrarla y solo reaparece en la mesa cuando la pantalla está completamente en negro */}
+            {isCameraOnDesk && (
               <InteractiveCamera
                 onClick={handleToggleCamcorder}
                 isZooming={animatingTo !== 'none'}
@@ -1050,7 +1299,7 @@ export default function DesktopScene() {
             )}
             <Clutter />
           </Suspense>
-          <FloatingDust />
+          <FloatingDust isCamcorderActive={isCamcorderActive} />
 
           <CameraController
             target={animatingTo}
