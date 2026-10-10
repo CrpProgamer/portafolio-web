@@ -5,31 +5,298 @@ import * as THREE from 'three';
 import InvestigationFiles from './InvestigationFiles.jsx';
 import OutlastCamcorderOverlay from './OutlastCamcorderOverlay.jsx';
 
-// ---- 3D Models & Room ----
-const Room = () => (
-  <group>
-    {/* Floor */}
-    <Plane args={[30, 30]} rotation={[-Math.PI / 2, 0, 0]} position={[0, -4, 0]} receiveShadow>
-      <meshStandardMaterial color="#0a0a0a" roughness={1} />
+// ---- 3D Models & Enclosed Asylum Office ----
+const AsylumDoor = () => (
+  <group position={[6.2, -0.7, -5.14]}>
+    {/* Marco metálico de la puerta */}
+    <Box args={[2.6, 4.8, 0.22]} position={[0, 0, 0]} castShadow receiveShadow>
+      <meshStandardMaterial color="#141816" roughness={0.7} metalness={0.6} />
+    </Box>
+    {/* Hoja de la puerta de madera maciza hospitalaria */}
+    <Box args={[2.24, 4.48, 0.12]} position={[0, -0.05, 0.05]} castShadow receiveShadow>
+      <meshStandardMaterial color="#2c221a" roughness={0.85} metalness={0.1} />
+    </Box>
+    {/* Plancha de protección de acero en la parte inferior */}
+    <Box args={[2.2, 0.8, 0.14]} position={[0, -1.8, 0.06]} castShadow receiveShadow>
+      <meshStandardMaterial color="#3a3d3a" roughness={0.5} metalness={0.8} />
+    </Box>
+    {/* Ventana de observación rectangular con barras */}
+    <group position={[0, 0.9, 0.06]}>
+      <Box args={[0.7, 1.1, 0.14]}>
+        <meshStandardMaterial color="#0b0e0c" roughness={0.4} />
+      </Box>
+      {/* Cristal reforzado esmerilado */}
+      <Plane args={[0.54, 0.94]} position={[0, 0, 0.08]}>
+        <meshStandardMaterial color="#2d4251" roughness={0.3} metalness={0.4} transparent opacity={0.85} />
+      </Plane>
+      {/* Barrotes de seguridad */}
+      {[-0.15, 0, 0.15].map((x, i) => (
+        <Box key={i} args={[0.025, 0.94, 0.03]} position={[x, 0, 0.1]}>
+          <meshStandardMaterial color="#1a1a1a" metalness={0.85} roughness={0.3} />
+        </Box>
+      ))}
+    </group>
+    {/* Manija pesada y cerradura */}
+    <Box args={[0.08, 0.35, 0.16]} position={[-0.88, -0.1, 0.12]} castShadow>
+      <meshStandardMaterial color="#a0a5a0" metalness={0.85} roughness={0.35} />
+    </Box>
+    {/* Letrero institucional de Murkoff */}
+    <Plane args={[1.6, 0.28]} position={[0, 2.15, 0.12]}>
+      <meshStandardMaterial color="#0c0e0c" roughness={0.5} />
     </Plane>
-    {/* Wall Front */}
-    <Plane args={[30, 15]} position={[0, 0, -5]} receiveShadow>
-      <meshStandardMaterial color="#050505" roughness={0.9} />
-    </Plane>
-    {/* Wall Back */}
-    <Plane args={[30, 15]} rotation={[0, Math.PI, 0]} position={[0, 0, 8]} receiveShadow>
-      <meshStandardMaterial color="#000" roughness={1} />
-    </Plane>
-    {/* Wall Left */}
-    <Plane args={[30, 15]} rotation={[0, Math.PI / 2, 0]} position={[-10, 0, 0]} receiveShadow>
-      <meshStandardMaterial color="#050505" roughness={0.9} />
-    </Plane>
-    {/* Wall Right */}
-    <Plane args={[30, 15]} rotation={[0, -Math.PI / 2, 0]} position={[10, 0, 0]} receiveShadow>
-      <meshStandardMaterial color="#050505" roughness={0.9} />
-    </Plane>
+    <Text position={[0, 2.15, 0.13]} fontSize={0.09} color="#e6dec8">
+      PABELLÓN D // CONSULTA 04
+    </Text>
+    {/* Haz frío de luz que se filtra por debajo y por la mirilla desde el pasillo exterior */}
+    <pointLight position={[0, -2.1, 0.4]} intensity={5.5} distance={3.8} color="#45709b" />
+    <pointLight position={[0, 0.9, 0.3]} intensity={2.8} distance={2.5} color="#45709b" />
   </group>
 );
+
+const FilingCabinet = ({ position = [8.3, -1.9, -4.2], rotation = [0, -0.35, 0] }) => (
+  <group position={position} rotation={rotation}>
+    {/* Estructura del archivador de 4 cajones */}
+    <Box args={[1.3, 4.2, 1.5]} position={[0, 0, 0]} castShadow receiveShadow>
+      <meshStandardMaterial color="#1f2622" roughness={0.65} metalness={0.55} />
+    </Box>
+    {/* 4 Cajones metálicos con manijas */}
+    {[-1.4, -0.45, 0.5, 1.45].map((y, i) => (
+      <group key={i} position={[0, y, 0.76]}>
+        <Box args={[1.18, 0.82, 0.04]} castShadow>
+          <meshStandardMaterial color="#262f2a" roughness={0.55} metalness={0.6} />
+        </Box>
+        {/* Manija cromada */}
+        <Box args={[0.34, 0.05, 0.08]} position={[0, 0.05, 0.04]}>
+          <meshStandardMaterial color="#8a928e" metalness={0.8} roughness={0.3} />
+        </Box>
+        {/* Porta-etiquetas */}
+        <Box args={[0.22, 0.12, 0.02]} position={[0, -0.15, 0.03]}>
+          <meshStandardMaterial color="#dfd4b8" roughness={0.9} />
+        </Box>
+      </group>
+    ))}
+  </group>
+);
+
+const OfficeShelf = ({ position = [9.1, -1.1, 1.5], rotation = [0, -Math.PI / 2, 0] }) => (
+  <group position={position} rotation={rotation}>
+    {/* Armazón metálico de la estantería */}
+    <Box args={[3.2, 5.4, 0.8]} position={[0, 0, 0]} castShadow receiveShadow>
+      <meshStandardMaterial color="#161816" roughness={0.7} metalness={0.7} />
+    </Box>
+    {/* 4 Baldas con archivadores y cajas de historiales clínicos */}
+    {[-1.8, -0.6, 0.6, 1.8].map((y, shelfIdx) => (
+      <group key={shelfIdx} position={[0, y, 0]}>
+        <Box args={[3.1, 0.06, 0.74]} position={[0, -0.38, 0]}>
+          <meshStandardMaterial color="#252725" metalness={0.6} />
+        </Box>
+        {/* Fila de carpetas y archivadores de cartón */}
+        {[-1.2, -0.8, -0.4, 0, 0.4, 0.8, 1.1].map((x, fileIdx) => {
+          const colors = ['#1e293b', '#3b1c1c', '#1e382b', '#42331c', '#27272a'];
+          const color = colors[(shelfIdx + fileIdx) % colors.length];
+          return (
+            <Box key={fileIdx} args={[0.22, 0.7, 0.52]} position={[x, 0, 0.04]} castShadow>
+              <meshStandardMaterial color={color} roughness={0.85} />
+            </Box>
+          );
+        })}
+      </group>
+    ))}
+  </group>
+);
+
+const InvestigationCorkboard = () => (
+  <group position={[1.8, 2.2, -5.14]}>
+    {/* Marco de madera de la pizarra */}
+    <Box args={[3.6, 2.2, 0.08]} castShadow>
+      <meshStandardMaterial color="#3a2717" roughness={0.9} />
+    </Box>
+    {/* Tablero de corcho */}
+    <Plane args={[3.4, 2.0]} position={[0, 0, 0.045]}>
+      <meshStandardMaterial color="#916a47" roughness={0.95} />
+    </Plane>
+    {/* Hojas y notas de investigación clavadas */}
+    {[
+      [-1.1, 0.4, 0.05, 0.08, '#d4c9aa'],
+      [-0.4, 0.5, 0.052, -0.05, '#e0d8c2'],
+      [0.6, 0.3, 0.05, 0.03, '#bfb291'],
+      [1.1, -0.3, 0.052, -0.09, '#c8bc9f'],
+      [-0.8, -0.4, 0.051, 0.12, '#8a0303'],
+      [0.1, -0.35, 0.053, -0.02, '#ded3b6']
+    ].map(([x, y, z, rot, col], idx) => (
+      <Plane key={idx} args={[0.42, 0.54]} position={[x, y, z]} rotation={[0, 0, rot]}>
+        <meshStandardMaterial color={col} roughness={0.9} />
+      </Plane>
+    ))}
+    {/* Cordel rojo de conexión de pistas */}
+    <Box args={[1.5, 0.015, 0.02]} position={[-0.3, 0.1, 0.056]} rotation={[0, 0, -0.35]}>
+      <meshBasicMaterial color="#b30000" />
+    </Box>
+  </group>
+);
+
+const AirDuctVent = () => (
+  <group position={[-9.45, 2.2, -1]} rotation={[0, Math.PI / 2, 0]}>
+    {/* Marco metálico del conducto de ventilación */}
+    <Box args={[1.8, 1.2, 0.1]} castShadow>
+      <meshStandardMaterial color="#222624" roughness={0.6} metalness={0.7} />
+    </Box>
+    {/* Interior oscuro */}
+    <Plane args={[1.55, 0.95]} position={[0, 0, 0.052]}>
+      <meshBasicMaterial color="#020403" />
+    </Plane>
+    {/* Lamas horizontales de la rejilla */}
+    {[-0.35, -0.2, -0.05, 0.1, 0.25, 0.4].map((y, i) => (
+      <Box key={i} args={[1.52, 0.04, 0.03]} position={[0, y, 0.06]}>
+        <meshStandardMaterial color="#424744" metalness={0.7} roughness={0.5} />
+      </Box>
+    ))}
+  </group>
+);
+
+const AnatomicalSkeleton = () => {
+  const { scene } = useGLTF('/assets/models/skeleton.glb');
+  const skeletonModel = useMemo(() => scene.clone(true), [scene]);
+
+  useEffect(() => {
+    skeletonModel.traverse((object) => {
+      if (!object.isMesh) return;
+      object.castShadow = true;
+      object.receiveShadow = true;
+      if (object.material) {
+        object.material.roughness = 0.85;
+      }
+    });
+  }, [skeletonModel]);
+
+  return (
+    <group position={[-7.6, -1.8, -3.8]} rotation={[0, 0.65, 0]} scale={2.6}>
+      <Center bottom>
+        <primitive object={skeletonModel} />
+      </Center>
+      {/* Soporte vertical y peana de clínica */}
+      <Box args={[0.04, 4.6, 0.04]} position={[0, 2.2, -0.15]}>
+        <meshStandardMaterial color="#1d201e" metalness={0.8} roughness={0.3} />
+      </Box>
+      <Box args={[0.8, 0.05, 0.8]} position={[0, 0.02, -0.15]}>
+        <meshStandardMaterial color="#161817" metalness={0.7} roughness={0.4} />
+      </Box>
+    </group>
+  );
+};
+
+// Linterna Infrarroja (IR Spotlight) fijada a la mirada de la cámara del jugador
+const CamcorderIRSpotlight = ({ active }) => {
+  const lightRef = useRef();
+  const targetRef = useRef();
+  const { camera } = useThree();
+
+  useFrame(() => {
+    if (!active || !lightRef.current || !targetRef.current) return;
+    lightRef.current.position.copy(camera.position);
+
+    // Vector dirección hacia donde apunta la cámara del jugador
+    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+    targetRef.current.position.copy(camera.position).add(forward.multiplyScalar(15));
+  });
+
+  if (!active) return null;
+
+  return (
+    <group>
+      <primitive object={new THREE.Object3D()} ref={targetRef} />
+      {/* Foco de infrarrojos que ilumina hacia donde se mira */}
+      <spotLight
+        ref={lightRef}
+        target={targetRef.current}
+        intensity={540}
+        distance={28}
+        angle={0.68}
+        penumbra={0.75}
+        color="#7dff9e"
+        decay={1.6}
+      />
+      {/* Luz envolvente suave alrededor del jugador */}
+      <pointLight
+        position={camera.position}
+        intensity={9}
+        distance={5}
+        color="#45ff78"
+      />
+    </group>
+  );
+};
+
+const Room = () => (
+  <group>
+    {/* Suelo: Baldosas clínicas institucionales de hospital */}
+    <Plane args={[20, 14]} rotation={[-Math.PI / 2, 0, 0]} position={[0, -4, 1.2]} receiveShadow>
+      <meshStandardMaterial color="#0c0e0d" roughness={0.82} metalness={0.15} />
+    </Plane>
+
+    {/* Techo completamente cerrado: Placas acústicas industriales */}
+    <Plane args={[20, 14]} rotation={[Math.PI / 2, 0, 0]} position={[0, 5.2, 1.2]} receiveShadow>
+      <meshStandardMaterial color="#080a09" roughness={0.95} />
+    </Plane>
+
+    {/* Lámparas fluorescentes industriales suspendidas en el techo */}
+    {[-3, 3].map((x, i) => (
+      <group key={i} position={[x, 5.05, 1.2]}>
+        <Box args={[3.6, 0.16, 0.6]} castShadow>
+          <meshStandardMaterial color="#181b19" roughness={0.5} metalness={0.7} />
+        </Box>
+        {/* Rejilla de protección */}
+        <Box args={[3.4, 0.02, 0.52]} position={[0, -0.09, 0]}>
+          <meshStandardMaterial color="#303532" metalness={0.85} roughness={0.3} />
+        </Box>
+      </group>
+    ))}
+
+    {/* Pared Frontal */}
+    <Plane args={[20, 9.4]} position={[0, 0.6, -5.2]} receiveShadow>
+      <meshStandardMaterial color="#121815" roughness={0.88} />
+    </Plane>
+    {/* Zócalo pared frontal */}
+    <Box args={[20, 0.35, 0.1]} position={[0, -3.85, -5.15]} receiveShadow>
+      <meshStandardMaterial color="#090b0a" roughness={0.7} metalness={0.3} />
+    </Box>
+
+    {/* Pared Trasera */}
+    <Plane args={[20, 9.4]} rotation={[0, Math.PI, 0]} position={[0, 0.6, 7.5]} receiveShadow>
+      <meshStandardMaterial color="#0d110f" roughness={0.92} />
+    </Plane>
+    <Box args={[20, 0.35, 0.1]} position={[0, -3.85, 7.45]} receiveShadow>
+      <meshStandardMaterial color="#090b0a" roughness={0.7} metalness={0.3} />
+    </Box>
+
+    {/* Pared Izquierda */}
+    <Plane args={[14, 9.4]} rotation={[0, Math.PI / 2, 0]} position={[-9.5, 0.6, 1.2]} receiveShadow>
+      <meshStandardMaterial color="#101412" roughness={0.9} />
+    </Plane>
+    <Box args={[0.1, 0.35, 14]} position={[-9.45, -3.85, 1.2]} receiveShadow>
+      <meshStandardMaterial color="#090b0a" roughness={0.7} metalness={0.3} />
+    </Box>
+
+    {/* Pared Derecha */}
+    <Plane args={[14, 9.4]} rotation={[0, -Math.PI / 2, 0]} position={[9.5, 0.6, 1.2]} receiveShadow>
+      <meshStandardMaterial color="#101412" roughness={0.9} />
+    </Plane>
+    <Box args={[0.1, 0.35, 14]} position={[9.45, -3.85, 1.2]} receiveShadow>
+      <meshStandardMaterial color="#090b0a" roughness={0.7} metalness={0.3} />
+    </Box>
+
+    {/* Elementos arquitectónicos y de atrezo de la oficina */}
+    <AsylumDoor />
+    <FilingCabinet />
+    <OfficeShelf />
+    <InvestigationCorkboard />
+    <AirDuctVent />
+    <Suspense fallback={null}>
+      <AnatomicalSkeleton />
+    </Suspense>
+  </group>
+);
+
 
 const makeTexture = (kind) => {
   const canvas = document.createElement('canvas');
@@ -662,6 +929,7 @@ export default function DesktopScene() {
   const [animatingTo, setAnimatingTo] = useState('none');
   const [activeOverlay, setActiveOverlay] = useState('none');
   const [isCamcorderActive, setIsCamcorderActive] = useState(false);
+  const [isCameraTransitioning, setIsCameraTransitioning] = useState(false);
 
   const handleOpen = (target) => {
     setAnimatingTo(target);
@@ -673,7 +941,30 @@ export default function DesktopScene() {
   };
 
   const handleToggleCamcorder = () => {
-    setIsCamcorderActive((prev) => !prev);
+    if (!isCamcorderActive) {
+      // Reproducir el sonido .wav de agarrar la cámara
+      try {
+        const pickupSound = new Audio('/assets/sounds/camera_pickup.wav');
+        pickupSound.volume = 0.95;
+        pickupSound.play().catch(() => {});
+      } catch (err) {}
+
+      // Activar efecto cinemático de parpadeo a negro de 1 segundo
+      setIsCameraTransitioning(true);
+      setIsCamcorderActive(true);
+
+      setTimeout(() => {
+        setIsCameraTransitioning(false);
+      }, 950);
+    } else {
+      // Bajar la videocámara
+      setIsCameraTransitioning(true);
+      setIsCamcorderActive(false);
+
+      setTimeout(() => {
+        setIsCameraTransitioning(false);
+      }, 400);
+    }
   };
 
   useEffect(() => {
@@ -682,7 +973,7 @@ export default function DesktopScene() {
         if (activeOverlay !== 'none') {
           handleClose();
         } else if (isCamcorderActive) {
-          setIsCamcorderActive(false);
+          handleToggleCamcorder();
         }
       }
     };
@@ -695,7 +986,7 @@ export default function DesktopScene() {
       <div className="w-full h-full">
         <Canvas camera={{ position: [0, 3.5, 4], fov: 60 }}>
           <color attach="background" args={['#010101']} />
-          <fog attach="fog" args={['#010101', 3, 12]} />
+          <fog attach="fog" args={['#010101', 3, 14]} />
 
           <ambientLight intensity={0.16} color="#8ba0c2" />
           <hemisphereLight args={['#526279', '#160b08', 0.34]} />
@@ -704,16 +995,22 @@ export default function DesktopScene() {
           <pointLight position={[-5, 1.5, -1]} intensity={13} distance={7} color="#38506d" />
           <pointLight position={[-3.8, 1.15, 0.7]} intensity={16} distance={4.6} color="#d7a76d" />
 
+          {/* Linterna Infrarroja (IR Spotlight) que ilumina hacia donde mira el jugador */}
+          <CamcorderIRSpotlight active={isCamcorderActive} />
+
           <Room />
           <Suspense fallback={null}>
             <Desk />
             <Monitor onClick={() => handleOpen('terminal')} isZooming={animatingTo !== 'none'} />
             <DocumentFolder onClick={() => handleOpen('document')} isZooming={animatingTo !== 'none'} />
-            <InteractiveCamera
-              onClick={handleToggleCamcorder}
-              isZooming={animatingTo !== 'none'}
-              isActive={isCamcorderActive}
-            />
+            {/* La cámara desaparece de la mesa al agarrarla y reaparece al bajarla */}
+            {!isCamcorderActive && (
+              <InteractiveCamera
+                onClick={handleToggleCamcorder}
+                isZooming={animatingTo !== 'none'}
+                isActive={isCamcorderActive}
+              />
+            )}
             <Clutter />
           </Suspense>
           <FloatingDust />
@@ -728,10 +1025,15 @@ export default function DesktopScene() {
         </Canvas>
       </div>
 
+      {/* Transición cinemática de parpadeo a negro (1 segundo) al agarrar la cámara */}
+      {isCameraTransitioning && (
+        <div className="fixed inset-0 z-50 bg-black pointer-events-none animate-camera-blink" />
+      )}
+
       {/* Visión Nocturna y HUD de Videocámara Outlast */}
       <OutlastCamcorderOverlay
         isActive={isCamcorderActive}
-        onToggleActive={setIsCamcorderActive}
+        onToggleActive={handleToggleCamcorder}
         isDocumentOrTerminalOpen={activeOverlay !== 'none'}
       />
 
@@ -744,3 +1046,4 @@ export default function DesktopScene() {
 
 useGLTF.preload('/assets/models/keyboard.glb');
 useGLTF.preload('/assets/models/low_poly_outlast_camera.glb');
+useGLTF.preload('/assets/models/skeleton.glb');

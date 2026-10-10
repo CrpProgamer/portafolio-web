@@ -70,3 +70,17 @@
   100% { transform: translate(3%, 1%); }
 }
 
+/* Transición cinemática de fundido a negro / parpadeo de cámara al levantar la videocámara */
+.animate-camera-blink {
+  animation: camera-blink 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes camera-blink {
+  0% { opacity: 0; }
+  25% { opacity: 1; }
+  70% { opacity: 1; }
+  85% { opacity: 0.8; }
+  100% { opacity: 0; }
+}
+
+
