@@ -86,36 +86,65 @@ const BloodWallWritings = () => (
   <group>
     {/* Mensaje central icónico en la pared del fondo sobre el escritorio (estilo Padre Martin / pacientes) */}
     <group position={[-1.2, 3.8, -5.14]}>
-      <Text fontSize={0.36} color="#380303" letterSpacing={0.08} anchorX="center" anchorY="middle">
+      <Text
+        font="/assets/fonts/Nosifer.ttf"
+        fontSize={0.42}
+        color="#450505"
+        letterSpacing={0.06}
+        anchorX="center"
+        anchorY="middle"
+      >
         EL WALRIDER NOS OBSERVA
       </Text>
       {/* Chorretones de sangre escurriendo por la pared como dedos arrastrados */}
-      {[-1.9, -0.8, 0.2, 1.4].map((x, i) => (
-        <Box key={i} args={[0.024, 0.45 + (i % 2) * 0.35, 0.01]} position={[x, -0.32, 0.005]}>
-          <meshBasicMaterial color="#2d0202" opacity={0.82} transparent />
+      {[-2.4, -1.8, -1.1, -0.4, 0.3, 0.9, 1.7, 2.2].map((x, i) => (
+        <Box key={i} args={[0.018 + (i % 3) * 0.008, 0.5 + (i % 4) * 0.28, 0.005]} position={[x, -0.42 - (i % 3) * 0.1, 0.005]}>
+          <meshStandardMaterial color="#320303" roughness={0.7} opacity={0.88} transparent />
         </Box>
       ))}
     </group>
 
     {/* Mensaje en la pared lateral izquierda junto al conducto de ventilación */}
     <group position={[-9.43, 0.8, -2.8]} rotation={[0, Math.PI / 2, 0]}>
-      <Text fontSize={0.3} color="#360202" letterSpacing={0.06} anchorX="center" anchorY="middle">
+      <Text
+        font="/assets/fonts/Nosifer.ttf"
+        fontSize={0.34}
+        color="#420404"
+        letterSpacing={0.05}
+        anchorX="center"
+        anchorY="middle"
+      >
         NO HAY SALIDA
       </Text>
-      <Text position={[0, -0.4, 0]} fontSize={0.18} color="#2b0202" letterSpacing={0.04} anchorX="center" anchorY="middle">
-        PURIFICACIÓN POR SANGRE
+      <Text
+        position={[0, -0.55, 0]}
+        font="/assets/fonts/Creepster.ttf"
+        fontSize={0.24}
+        color="#380303"
+        letterSpacing={0.08}
+        anchorX="center"
+        anchorY="middle"
+      >
+        PURIFICACION POR SANGRE
       </Text>
-      {[-0.8, 0.6].map((x, i) => (
-        <Box key={i} args={[0.02, 0.5, 0.01]} position={[x, -0.25, 0.005]}>
-          <meshBasicMaterial color="#290202" opacity={0.78} transparent />
+      {[-1.2, -0.6, 0.4, 1.0].map((x, i) => (
+        <Box key={i} args={[0.02, 0.55 + (i % 3) * 0.2, 0.005]} position={[x, -0.35, 0.005]}>
+          <meshStandardMaterial color="#2d0202" roughness={0.7} opacity={0.82} transparent />
         </Box>
       ))}
     </group>
 
     {/* Inscripción conspirativa de Murkoff cerca del archivador */}
-    <group position={[4.6, -1.8, -5.14]}>
-      <Text fontSize={0.16} color="#2e0202" letterSpacing={0.05} anchorX="center" anchorY="middle">
-        MURKOFF MIENTE // TERAPIA MORFOGÉNICA
+    <group position={[4.6, -1.8, -5.14]} rotation={[0, 0, -0.04]}>
+      <Text
+        font="/assets/fonts/RockSalt.ttf"
+        fontSize={0.19}
+        color="#3e0505"
+        letterSpacing={0.04}
+        anchorX="center"
+        anchorY="middle"
+      >
+        MURKOFF MIENTE // TERAPIA MORFOGENICA
       </Text>
     </group>
   </group>
@@ -376,48 +405,82 @@ const AnatomicalSkeleton = () => {
   );
 };
 
-// Linterna Infrarroja (IR Spotlight) fijada a la mirada de la cámara del jugador
+// Linterna Infrarroja (IR Spotlight) fijada directamente al visor óptico de la cámara (cero desfase de trackeo)
 const CamcorderIRSpotlight = ({ active, zoom = 1.0 }) => {
   const lightRef = useRef();
-  const targetRef = useRef();
-  const { camera } = useThree();
+  const fillLightRef = useRef();
+  const { camera, scene } = useThree();
 
-  useFrame(() => {
-    if (!active || !lightRef.current || !targetRef.current) return;
-    lightRef.current.position.copy(camera.position);
+  // Target persistente rígidamente fijado en el eje óptico local de la cámara (hacia donde apunta la cruz)
+  const targetObject = useMemo(() => {
+    const obj = new THREE.Object3D();
+    obj.name = 'CamcorderIRTarget';
+    obj.position.set(0, 0, -22);
+    return obj;
+  }, []);
 
-    // Vector dirección hacia donde apunta la mirada de la cámara
-    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-    targetRef.current.position.copy(camera.position).add(forward.multiplyScalar(16));
-  });
+  useEffect(() => {
+    if (!camera.parent) scene.add(camera);
+    camera.add(targetObject);
 
-  if (!active) return null;
+    const spot = lightRef.current;
+    if (spot) {
+      camera.add(spot);
+      spot.target = targetObject;
+      spot.position.set(0, 0, 0);
+    }
+
+    const fill = fillLightRef.current;
+    if (fill) {
+      camera.add(fill);
+      fill.position.set(0, 0, 0);
+    }
+
+    return () => {
+      camera.remove(targetObject);
+      if (spot) camera.remove(spot);
+      if (fill) camera.remove(fill);
+    };
+  }, [camera, scene, targetObject]);
 
   // Ajustar el ángulo del cono de luz según el nivel de zoom para concentrar el haz
-  const beamAngle = Math.max(0.24, 0.52 / zoom);
+  const beamAngle = Math.max(0.28, 0.58 / zoom);
+
+  useFrame(() => {
+    const spot = lightRef.current;
+    if (spot) {
+      spot.position.set(0, 0, 0);
+      targetObject.position.set(0, 0, -22);
+      spot.target = targetObject;
+      spot.intensity = active ? 740 : 0;
+    }
+    if (fillLightRef.current) {
+      fillLightRef.current.position.set(0, 0, 0);
+      fillLightRef.current.intensity = active ? 1.6 : 0;
+    }
+  });
 
   return (
-    <group>
-      <primitive object={new THREE.Object3D()} ref={targetRef} />
-      {/* Foco de infrarrojos que ilumina con alto contraste hacia donde se mira */}
+    <>
+      {/* Foco de infrarrojos que ilumina con alto contraste exactamente al centro de la cruz de la cámara */}
       <spotLight
         ref={lightRef}
-        target={targetRef.current}
-        intensity={680}
-        distance={28}
+        intensity={active ? 740 : 0}
+        distance={32}
         angle={beamAngle}
-        penumbra={0.7}
+        penumbra={0.72}
         color="#72fca0"
-        decay={1.75}
+        decay={1.65}
+        castShadow={false}
       />
-      {/* Luz ambiente tenue y fría para sombras nítidas estilo Outlast */}
+      {/* Luz ambiente local en la cámara para bañar sutilmente el entorno cercano */}
       <pointLight
-        position={camera.position}
-        intensity={1.2}
-        distance={3.2}
+        ref={fillLightRef}
+        intensity={active ? 1.6 : 0}
+        distance={3.8}
         color="#2b7548"
       />
-    </group>
+    </>
   );
 };
 
@@ -614,36 +677,30 @@ const BloodStain = ({ position, rotation = 0, size = [1.4, 0.7], opacity = 0.82 
 
 const BloodTextureStain = ({ file, position, rotation = 0, planeRotation = null, size, opacity = 1 }) => {
   const sourceTexture = useTexture(`/assets/textures/BlueRoseSonata%20Blood%20FX%20Pack/${file}`);
-  const texture = useMemo(() => {
-    const image = sourceTexture.image;
-    const canvas = document.createElement('canvas');
-    canvas.width = image.width;
-    canvas.height = image.height;
-    const context = canvas.getContext('2d', { willReadFrequently: true });
-    context.drawImage(image, 0, 0);
-    const pixels = context.getImageData(0, 0, canvas.width, canvas.height);
 
-    // El pack viene sobre negro: se transforma ese negro en alfa, no en una mancha opaca.
-    for (let index = 0; index < pixels.data.length; index += 4) {
-      const red = pixels.data[index];
-      const green = pixels.data[index + 1];
-      const blue = pixels.data[index + 2];
-      const redDominance = Math.max(0, red - (green + blue) * 0.32);
-      pixels.data[index + 3] = Math.min(pixels.data[index + 3], Math.min(255, redDominance * 3.8));
+  useEffect(() => {
+    if (sourceTexture) {
+      sourceTexture.colorSpace = THREE.SRGBColorSpace;
+      sourceTexture.needsUpdate = true;
     }
-    context.putImageData(pixels, 0, 0);
-    const processed = new THREE.CanvasTexture(canvas);
-    processed.colorSpace = THREE.SRGBColorSpace;
-    processed.needsUpdate = true;
-    return processed;
   }, [sourceTexture]);
-  useEffect(() => () => texture.dispose(), [texture]);
 
   const finalRotation = planeRotation || [-Math.PI / 2, 0, rotation];
 
   return (
     <Plane args={size} rotation={finalRotation} position={position}>
-      <meshBasicMaterial map={texture} transparent opacity={opacity} depthWrite={false} side={THREE.DoubleSide} />
+      <meshStandardMaterial
+        map={sourceTexture}
+        transparent
+        opacity={opacity}
+        alphaTest={0.02}
+        depthWrite={false}
+        polygonOffset
+        polygonOffsetFactor={-1}
+        roughness={0.65}
+        metalness={0.05}
+        side={THREE.DoubleSide}
+      />
     </Plane>
   );
 };

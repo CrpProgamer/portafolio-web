@@ -56,7 +56,7 @@ export const playCamcorderSound = (type) => {
       osc.start();
       osc.stop(ctx.currentTime + 0.14);
     }
-  } catch (err) {}
+  } catch (err) { }
 };
 
 export default function OutlastCamcorderOverlay({
@@ -224,7 +224,7 @@ export default function OutlastCamcorderOverlay({
         <div
           className="absolute inset-0 mix-blend-overlay outlast-grain-animation pointer-events-none"
           style={{
-            opacity: 0.09,
+            opacity: 0.11,
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
             backgroundRepeat: 'repeat',
             backgroundSize: '160px 160px',
@@ -251,9 +251,8 @@ export default function OutlastCamcorderOverlay({
           <div className="flex items-center gap-3 drop-shadow-[0_0_8px_rgba(229,9,20,0.6)]">
             <div className="flex items-center gap-1.5">
               <span
-                className={`w-3 h-3 rounded-full bg-[#e50914] ${
-                  recBlink ? 'opacity-100' : 'opacity-30'
-                } transition-opacity duration-150`}
+                className={`w-3 h-3 rounded-full bg-[#e50914] ${recBlink ? 'opacity-100' : 'opacity-30'
+                  } transition-opacity duration-150`}
               />
               <span className="font-bold text-[#e50914] text-sm sm:text-base tracking-wider font-mono">
                 REC
@@ -319,13 +318,12 @@ export default function OutlastCamcorderOverlay({
                 {[1, 2, 3, 4].map((seg) => (
                   <div
                     key={seg}
-                    className={`flex-1 h-full rounded-[0.5px] transition-all duration-300 ${
-                      seg <= segmentsFilled
-                        ? batteryLevel <= 20
-                          ? 'bg-red-500 animate-pulse'
-                          : 'bg-white'
-                        : 'bg-transparent'
-                    }`}
+                    className={`flex-1 h-full rounded-[0.5px] transition-all duration-300 ${seg <= segmentsFilled
+                      ? batteryLevel <= 20
+                        ? 'bg-red-500 animate-pulse'
+                        : 'bg-white'
+                      : 'bg-transparent'
+                      }`}
                   />
                 ))}
                 {/* Borne positivo derecho */}
@@ -337,7 +335,7 @@ export default function OutlastCamcorderOverlay({
             <div className="flex items-center gap-1.5 text-neutral-300/80 text-[10px]">
               <div className="border border-white/60 px-1 py-[0.5px] rounded-[1px] flex items-center justify-center">
                 <svg className="w-3.5 h-2 text-white" viewBox="0 0 24 16" fill="currentColor">
-                  <path d="M12 0C6 0 1.5 5.5 0 8c1.5 2.5 6 8 12 8s10.5-5.5 12-8c-1.5-2.5-6-8-12-8zm0 13c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5zm0-8c-1.7 0-3 1.3-3 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3z"/>
+                  <path d="M12 0C6 0 1.5 5.5 0 8c1.5 2.5 6 8 12 8s10.5-5.5 12-8c-1.5-2.5-6-8-12-8zm0 13c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5zm0-8c-1.7 0-3 1.3-3 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3z" />
                 </svg>
               </div>
               <div className="border border-white/60 px-1 py-[0.5px] rounded-[1px] flex items-center gap-[2px]">
