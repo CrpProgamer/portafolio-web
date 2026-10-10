@@ -352,27 +352,103 @@ const UnstableDeskLight = () => {
 
 
 
-
-const ImportedCamera = () => {
+const InteractiveCamera = ({ onClick, isZooming, isActive }) => {
+  const [hovered, setHovered] = useState(false);
   const { scene } = useGLTF('/assets/models/low_poly_outlast_camera.glb');
   const cameraModel = useMemo(() => scene.clone(true), [scene]);
+
+  // Contorno blanco invertido (Inverted Hull) para silueta 3D nítida en hover
+  const outlineModel = useMemo(() => {
+    const clone = scene.clone(true);
+    const outlineMat = new THREE.MeshBasicMaterial({
+      color: '#ffffff',
+      side: THREE.BackSide,
+      depthWrite: false,
+      transparent: true,
+      opacity: 0.95,
+    });
+    clone.traverse((object) => {
+      if (object.isMesh) {
+        object.material = outlineMat;
+      }
+    });
+    return clone;
+  }, [scene]);
+
+  useCursor(hovered && !isZooming);
 
   useEffect(() => {
     cameraModel.traverse((object) => {
       if (!object.isMesh) return;
       object.castShadow = true;
       object.receiveShadow = true;
+      if (object.material) {
+        object.material = object.material.clone();
+      }
     });
   }, [cameraModel]);
 
+  // Iluminar los materiales y contornos de la cámara en blanco brillante al pasar el cursor
+  useEffect(() => {
+    cameraModel.traverse((object) => {
+      if (!object.isMesh || !object.material) return;
+      if (hovered) {
+        object.material.emissive = new THREE.Color('#ffffff');
+        object.material.emissiveIntensity = 0.42;
+      } else if (isActive) {
+        object.material.emissive = new THREE.Color('#0a3a14');
+        object.material.emissiveIntensity = 0.25;
+      } else {
+        object.material.emissive = new THREE.Color('#000000');
+        object.material.emissiveIntensity = 0;
+      }
+    });
+  }, [hovered, isActive, cameraModel]);
+
   return (
-    <group position={[-4.6, 0.7, -0.7]} rotation={[0, 1, 0]} scale={5}>
+    <group
+      position={[-4.6, 0.7, -0.7]}
+      rotation={[0, 1, 0]}
+      scale={5}
+      onClick={!isZooming ? onClick : null}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        setHovered(true);
+      }}
+      onPointerOut={() => setHovered(false)}
+    >
       <Center>
-        <primitive object={cameraModel} />
+        <group>
+          <primitive object={cameraModel} />
+          {/* Contorno blanco que bordea el modelo tridimensional */}
+          {hovered && !isZooming && (
+            <group scale={1.055}>
+              <primitive object={outlineModel} />
+            </group>
+          )}
+        </group>
       </Center>
+
+      {/* Luz puntual blanca centrada en la cámara al hacer hover */}
+      <pointLight
+        position={[0, 0.25, 0]}
+        intensity={hovered ? 6 : isActive ? 2 : 0}
+        distance={2.4}
+        color={hovered ? '#ffffff' : '#22ff77'}
+      />
+
+      {/* Rótulo de texto interactivo con resplandor */}
+      {hovered && !isZooming && (
+        <group position={[0, 0.5, 0]} rotation={[0, -0.9, 0]}>
+          <Text fontSize={0.075} color="#ffffff" anchorX="center" anchorY="middle">
+            {isActive ? "> [CLIC] DESACTIVAR CÁMARA" : "> [CLIC] ACTIVAR VIDEOCÁMARA"}
+          </Text>
+        </group>
+      )}
     </group>
   );
 };
+
 
 const Keyboard = () => {
   const { scene } = useGLTF('/assets/models/keyboard.glb');
@@ -480,7 +556,6 @@ const Clutter = () => (
     </Box>
     <Keyboard />
     <Mouse />
-    <ImportedCamera />
   </group>
 );
 
@@ -586,6 +661,7 @@ const TerminalOverlay = ({ onClose }) => (
 export default function DesktopScene() {
   const [animatingTo, setAnimatingTo] = useState('none');
   const [activeOverlay, setActiveOverlay] = useState('none');
+  const [isCamcorderActive, setIsCamcorderActive] = useState(false);
 
   const handleOpen = (target) => {
     setAnimatingTo(target);
@@ -596,13 +672,23 @@ export default function DesktopScene() {
     setAnimatingTo('none');
   };
 
+  const handleToggleCamcorder = () => {
+    setIsCamcorderActive((prev) => !prev);
+  };
+
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') handleClose();
+      if (e.key === 'Escape') {
+        if (activeOverlay !== 'none') {
+          handleClose();
+        } else if (isCamcorderActive) {
+          setIsCamcorderActive(false);
+        }
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [activeOverlay, isCamcorderActive]);
 
   return (
     <div className="w-screen h-screen relative bg-black overflow-hidden cursor-crosshair">
@@ -623,6 +709,11 @@ export default function DesktopScene() {
             <Desk />
             <Monitor onClick={() => handleOpen('terminal')} isZooming={animatingTo !== 'none'} />
             <DocumentFolder onClick={() => handleOpen('document')} isZooming={animatingTo !== 'none'} />
+            <InteractiveCamera
+              onClick={handleToggleCamcorder}
+              isZooming={animatingTo !== 'none'}
+              isActive={isCamcorderActive}
+            />
             <Clutter />
           </Suspense>
           <FloatingDust />
@@ -638,7 +729,11 @@ export default function DesktopScene() {
       </div>
 
       {/* Visión Nocturna y HUD de Videocámara Outlast */}
-      <OutlastCamcorderOverlay isDocumentOrTerminalOpen={activeOverlay !== 'none'} />
+      <OutlastCamcorderOverlay
+        isActive={isCamcorderActive}
+        onToggleActive={setIsCamcorderActive}
+        isDocumentOrTerminalOpen={activeOverlay !== 'none'}
+      />
 
       {/* Overlays */}
       {activeOverlay === 'document' && <DocumentOverlay onClose={handleClose} />}
