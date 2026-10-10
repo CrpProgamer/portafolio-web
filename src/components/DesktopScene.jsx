@@ -1215,7 +1215,7 @@ export default function DesktopScene() {
       gain.connect(ctx.destination);
       osc.start();
       osc.stop(ctx.currentTime + 0.22);
-    } catch (err) {}
+    } catch (err) { }
   };
 
   const handleTurn = (direction) => {
@@ -1416,9 +1416,8 @@ export default function DesktopScene() {
               e.stopPropagation();
               handleTurn('left');
             }}
-            className={`fixed left-0 top-0 bottom-0 w-28 z-30 flex items-center justify-start pl-4 pointer-events-auto transition-all duration-300 cursor-w-resize select-none ${
-              nearEdge === 'left' ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 pointer-events-none'
-            }`}
+            className={`fixed left-0 top-0 bottom-0 w-28 z-30 flex items-center justify-start pl-4 pointer-events-auto transition-all duration-300 cursor-w-resize select-none ${nearEdge === 'left' ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 pointer-events-none'
+              }`}
             title="Clic para girar 90° a la izquierda (o pulsa Q / ◀)"
           >
             <div className="bg-black/85 border border-[#3dff84]/50 text-[#3dff84] px-3.5 py-2 rounded-sm text-xs font-mono tracking-widest uppercase flex items-center gap-2 shadow-[0_0_20px_rgba(61,255,132,0.4)] backdrop-blur-sm animate-pulse">
@@ -1432,9 +1431,8 @@ export default function DesktopScene() {
               e.stopPropagation();
               handleTurn('right');
             }}
-            className={`fixed right-0 top-0 bottom-0 w-28 z-30 flex items-center justify-end pr-4 pointer-events-auto transition-all duration-300 cursor-e-resize select-none ${
-              nearEdge === 'right' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4 pointer-events-none'
-            }`}
+            className={`fixed right-0 top-0 bottom-0 w-28 z-30 flex items-center justify-end pr-4 pointer-events-auto transition-all duration-300 cursor-e-resize select-none ${nearEdge === 'right' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4 pointer-events-none'
+              }`}
             title="Clic para girar 90° a la derecha (o pulsa E / ▶)"
           >
             <div className="bg-black/85 border border-[#3dff84]/50 text-[#3dff84] px-3.5 py-2 rounded-sm text-xs font-mono tracking-widest uppercase flex items-center gap-2 shadow-[0_0_20px_rgba(61,255,132,0.4)] backdrop-blur-sm animate-pulse">
