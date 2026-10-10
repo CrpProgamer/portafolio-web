@@ -1057,10 +1057,22 @@ const Clutter = () => (
   </group>
 );
 
-// ---- Camera Controller (Breathing, Fear Tremor, Mouse Look & Dynamic Optical Zoom) ----
-const CameraController = ({ target, onReachedTarget, isCamcorderActive, zoomLevel = 1.0 }) => {
+// ---- Camera Controller (Breathing, Fear Tremor, Mouse Look, Dynamic Optical Zoom & 90-degree Turns) ----
+const CameraController = ({
+  target,
+  onReachedTarget,
+  isCamcorderActive,
+  zoomLevel = 1.0,
+  baseYaw = 0
+}) => {
   const { camera, clock } = useThree();
   const basePos = new THREE.Vector3(0, 3.5, 4);
+  const currentYaw = useRef(0);
+
+  // Usar orden de Euler 'YXZ' para evitar bloqueos de cardán y rotar la cabeza limpiamente
+  useEffect(() => {
+    camera.rotation.order = 'YXZ';
+  }, [camera]);
 
   useFrame((state) => {
     const time = clock.getElapsedTime();
@@ -1081,8 +1093,11 @@ const CameraController = ({ target, onReachedTarget, isCamcorderActive, zoomLeve
       const tremorX = isCamcorderActive ? (Math.sin(time * 24) * 0.0035 + Math.cos(time * 38) * 0.002) : 0;
       const tremorY = isCamcorderActive ? (Math.cos(time * 20) * 0.0035 + Math.sin(time * 34) * 0.002) : 0;
 
-      camera.rotation.y = THREE.MathUtils.lerp(camera.rotation.y, -targetX + tremorX, 0.05);
-      camera.rotation.x = THREE.MathUtils.lerp(camera.rotation.x, targetY + tremorY, 0.05);
+      // Interpolación suave hacia el nuevo ángulo de 90° (baseYaw)
+      currentYaw.current = THREE.MathUtils.lerp(currentYaw.current, baseYaw, 0.08);
+
+      camera.rotation.y = currentYaw.current - targetX + tremorX;
+      camera.rotation.x = THREE.MathUtils.lerp(camera.rotation.x, targetY + tremorY, 0.08);
 
       // Respiración más agitada e irregular en visión nocturna
       const breathIntensity = isCamcorderActive ? 0.065 : 0.04;
@@ -1094,6 +1109,7 @@ const CameraController = ({ target, onReachedTarget, isCamcorderActive, zoomLeve
       camera.position.lerp(targetPos, 0.05);
     }
     else if (target === 'document') {
+      currentYaw.current = THREE.MathUtils.lerp(currentYaw.current, 0, 0.1);
       const docPos = new THREE.Vector3(1.5, 1.8, 1.2);
       camera.position.lerp(docPos, 0.08);
 
@@ -1105,6 +1121,7 @@ const CameraController = ({ target, onReachedTarget, isCamcorderActive, zoomLeve
       if (camera.position.distanceTo(docPos) < 0.1) onReachedTarget('document');
     }
     else if (target === 'terminal') {
+      currentYaw.current = THREE.MathUtils.lerp(currentYaw.current, 0, 0.1);
       const monPos = new THREE.Vector3(-1.8, 1.5, 0.8);
       camera.position.lerp(monPos, 0.08);
 
@@ -1178,6 +1195,38 @@ export default function DesktopScene() {
   const [isCameraOnDesk, setIsCameraOnDesk] = useState(true);
   const [isCameraTransitioning, setIsCameraTransitioning] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1.0);
+  const [baseYaw, setBaseYaw] = useState(0); // Ángulo base de rotación en pasos de 90°
+  const [nearEdge, setNearEdge] = useState(null); // 'left' | 'right' | null
+  const lastTurnTime = useRef(0);
+
+  const playTurnSound = () => {
+    try {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContext) return;
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(115, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(45, ctx.currentTime + 0.18);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.22);
+    } catch (err) {}
+  };
+
+  const handleTurn = (direction) => {
+    if (activeOverlay !== 'none') return;
+    const now = Date.now();
+    if (now - lastTurnTime.current < 280) return; // Cooldown para evitar giros involuntarios dobles
+    lastTurnTime.current = now;
+
+    playTurnSound();
+    setBaseYaw((prev) => (direction === 'right' ? prev - Math.PI / 2 : prev + Math.PI / 2));
+  };
 
   const handleOpen = (target) => {
     setAnimatingTo(target);
@@ -1247,13 +1296,58 @@ export default function DesktopScene() {
     return () => window.removeEventListener('wheel', handleWheel);
   }, [isCamcorderActive]);
 
+  // Detección de límite izquierdo / derecho en la pantalla para activar giros de 90° con clic
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (activeOverlay !== 'none') {
+        setNearEdge(null);
+        return;
+      }
+      const normalizedX = (e.clientX / window.innerWidth) * 2 - 1;
+      if (normalizedX > 0.72) {
+        setNearEdge('right');
+      } else if (normalizedX < -0.72) {
+        setNearEdge('left');
+      } else {
+        setNearEdge(null);
+      }
+    };
+
+    const handleClick = (e) => {
+      if (activeOverlay !== 'none') return;
+      const normalizedX = (e.clientX / window.innerWidth) * 2 - 1;
+      if (normalizedX > 0.72) {
+        handleTurn('right');
+      } else if (normalizedX < -0.72) {
+        handleTurn('left');
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('click', handleClick);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('click', handleClick);
+    };
+  }, [activeOverlay]);
+
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
       if (e.key === 'Escape') {
         if (activeOverlay !== 'none') {
           handleClose();
         } else if (isCamcorderActive) {
           handleToggleCamcorder();
+        }
+      } else if (activeOverlay === 'none') {
+        // Atajos de teclado para girar 90° libremente
+        if (e.key === 'ArrowRight' || e.key === 'e' || e.key === 'E') {
+          handleTurn('right');
+        } else if (e.key === 'ArrowLeft' || e.key === 'q' || e.key === 'Q') {
+          handleTurn('left');
         }
       }
     };
@@ -1305,6 +1399,7 @@ export default function DesktopScene() {
             target={animatingTo}
             isCamcorderActive={isCamcorderActive}
             zoomLevel={zoomLevel}
+            baseYaw={baseYaw}
             onReachedTarget={(target) => {
               if (activeOverlay !== target) setActiveOverlay(target);
             }}
@@ -1312,6 +1407,43 @@ export default function DesktopScene() {
 
         </Canvas>
       </div>
+
+      {/* Indicadores visuales interactivos de giro de 90° al llegar al límite de la pantalla */}
+      {activeOverlay === 'none' && (
+        <>
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              handleTurn('left');
+            }}
+            className={`fixed left-0 top-0 bottom-0 w-28 z-30 flex items-center justify-start pl-4 pointer-events-auto transition-all duration-300 cursor-w-resize select-none ${
+              nearEdge === 'left' ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 pointer-events-none'
+            }`}
+            title="Clic para girar 90° a la izquierda (o pulsa Q / ◀)"
+          >
+            <div className="bg-black/85 border border-[#3dff84]/50 text-[#3dff84] px-3.5 py-2 rounded-sm text-xs font-mono tracking-widest uppercase flex items-center gap-2 shadow-[0_0_20px_rgba(61,255,132,0.4)] backdrop-blur-sm animate-pulse">
+              <span className="text-base font-bold">◀</span>
+              <span className="hidden sm:inline">GIRAR 90°</span>
+            </div>
+          </div>
+
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              handleTurn('right');
+            }}
+            className={`fixed right-0 top-0 bottom-0 w-28 z-30 flex items-center justify-end pr-4 pointer-events-auto transition-all duration-300 cursor-e-resize select-none ${
+              nearEdge === 'right' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4 pointer-events-none'
+            }`}
+            title="Clic para girar 90° a la derecha (o pulsa E / ▶)"
+          >
+            <div className="bg-black/85 border border-[#3dff84]/50 text-[#3dff84] px-3.5 py-2 rounded-sm text-xs font-mono tracking-widest uppercase flex items-center gap-2 shadow-[0_0_20px_rgba(61,255,132,0.4)] backdrop-blur-sm animate-pulse">
+              <span className="hidden sm:inline">GIRAR 90°</span>
+              <span className="text-base font-bold">▶</span>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Transición cinemática de parpadeo a negro (1 segundo) al agarrar la cámara */}
       {isCameraTransitioning && (

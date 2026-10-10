@@ -57,17 +57,33 @@
   53% { filter: brightness(0.99) contrast(1); }
 }
 
-/* Outlast Camcorder Grain & Sensor Jitter (Efecto analógico de estática en vivo) */
+/* Outlast Camcorder Grain & Sensor Rolling Jitter (Barrido analógico descendente estilo sensor CMOS) */
 .outlast-grain-animation {
-  animation: outlast-grain 0.25s steps(4) infinite;
+  animation: outlast-grain 0.28s steps(6) infinite;
 }
 
 @keyframes outlast-grain {
-  0% { transform: translate(0, 0); }
-  25% { transform: translate(-3%, 2%); }
-  50% { transform: translate(2%, -3%); }
-  75% { transform: translate(-1%, -2%); }
-  100% { transform: translate(3%, 1%); }
+  0% {
+    background-position: 0px 0px;
+  }
+  16.6% {
+    background-position: -10px 45px;
+  }
+  33.3% {
+    background-position: 14px 90px;
+  }
+  50% {
+    background-position: -8px 135px;
+  }
+  66.6% {
+    background-position: 16px 180px;
+  }
+  83.3% {
+    background-position: -12px 225px;
+  }
+  100% {
+    background-position: 0px 270px;
+  }
 }
 
 /* Transición cinemática de fundido a negro / parpadeo de cámara al levantar la videocámara */
