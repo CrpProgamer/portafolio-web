@@ -56,3 +56,17 @@
   50% { filter: brightness(0.92) contrast(1.04); }
   53% { filter: brightness(0.99) contrast(1); }
 }
+
+/* Outlast Camcorder Grain & Sensor Jitter (Efecto analógico de estática en vivo) */
+.outlast-grain-animation {
+  animation: outlast-grain 0.25s steps(4) infinite;
+}
+
+@keyframes outlast-grain {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-3%, 2%); }
+  50% { transform: translate(2%, -3%); }
+  75% { transform: translate(-1%, -2%); }
+  100% { transform: translate(3%, 1%); }
+}
+

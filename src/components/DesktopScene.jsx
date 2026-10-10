@@ -3,6 +3,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Box, Plane, Text, useCursor, RoundedBox, useGLTF, useTexture, Center } from '@react-three/drei';
 import * as THREE from 'three';
 import InvestigationFiles from './InvestigationFiles.jsx';
+import OutlastCamcorderOverlay from './OutlastCamcorderOverlay.jsx';
 
 // ---- 3D Models & Room ----
 const Room = () => (
@@ -635,6 +636,9 @@ export default function DesktopScene() {
 
         </Canvas>
       </div>
+
+      {/* Visión Nocturna y HUD de Videocámara Outlast */}
+      <OutlastCamcorderOverlay isDocumentOrTerminalOpen={activeOverlay !== 'none'} />
 
       {/* Overlays */}
       {activeOverlay === 'document' && <DocumentOverlay onClose={handleClose} />}

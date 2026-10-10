@@ -181,11 +181,11 @@ export default function InvestigationFiles() {
             
             <div className="space-y-4 text-gray-300 leading-relaxed text-justify">
               <p>
-                <span className="text-murkoff-blood font-bold">> RIESGO TERRITORIAL:</span> Los datos indican que las PYMEs de la región de Colchagua presentan una vulnerabilidad crítica ante fluctuaciones [CENSURADO]. Las comunas periféricas muestran una correlación del 0.84 con el abandono de operaciones.
+                <span className="text-murkoff-blood font-bold">&gt; RIESGO TERRITORIAL:</span> Los datos indican que las PYMEs de la región de Colchagua presentan una vulnerabilidad crítica ante fluctuaciones [CENSURADO]. Las comunas periféricas muestran una correlación del 0.84 con el abandono de operaciones.
               </p>
               
               <p>
-                <span className="text-murkoff-blood font-bold">> HALLAZGO TÉCNICO:</span> Se logró optimizar el proceso ETL reduciendo el tiempo de carga en un 40% al implementar un Datamart estructurado en esquema de estrella. El análisis DAX demostró que [DATOS CORRUPTOS].
+                <span className="text-murkoff-blood font-bold">&gt; HALLAZGO TÉCNICO:</span> Se logró optimizar el proceso ETL reduciendo el tiempo de carga en un 40% al implementar un Datamart estructurado en esquema de estrella. El análisis DAX demostró que [DATOS CORRUPTOS].
               </p>
               
               <p className="border-l-4 border-murkoff-blood pl-4 py-2 bg-black text-sm">
