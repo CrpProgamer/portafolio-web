@@ -186,7 +186,7 @@ const AnatomicalSkeleton = () => {
 };
 
 // Linterna Infrarroja (IR Spotlight) fijada a la mirada de la cámara del jugador
-const CamcorderIRSpotlight = ({ active }) => {
+const CamcorderIRSpotlight = ({ active, zoom = 1.0 }) => {
   const lightRef = useRef();
   const targetRef = useRef();
   const { camera } = useThree();
@@ -195,33 +195,36 @@ const CamcorderIRSpotlight = ({ active }) => {
     if (!active || !lightRef.current || !targetRef.current) return;
     lightRef.current.position.copy(camera.position);
 
-    // Vector dirección hacia donde apunta la cámara del jugador
+    // Vector dirección hacia donde apunta la mirada de la cámara
     const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-    targetRef.current.position.copy(camera.position).add(forward.multiplyScalar(15));
+    targetRef.current.position.copy(camera.position).add(forward.multiplyScalar(16));
   });
 
   if (!active) return null;
 
+  // Ajustar el ángulo del cono de luz según el nivel de zoom para concentrar el haz
+  const beamAngle = Math.max(0.24, 0.52 / zoom);
+
   return (
     <group>
       <primitive object={new THREE.Object3D()} ref={targetRef} />
-      {/* Foco de infrarrojos que ilumina hacia donde se mira */}
+      {/* Foco de infrarrojos que ilumina con alto contraste hacia donde se mira */}
       <spotLight
         ref={lightRef}
         target={targetRef.current}
-        intensity={540}
+        intensity={680}
         distance={28}
-        angle={0.68}
-        penumbra={0.75}
-        color="#7dff9e"
-        decay={1.6}
+        angle={beamAngle}
+        penumbra={0.7}
+        color="#72fca0"
+        decay={1.75}
       />
-      {/* Luz envolvente suave alrededor del jugador */}
+      {/* Luz ambiente tenue y fría para sombras nítidas estilo Outlast */}
       <pointLight
         position={camera.position}
-        intensity={9}
-        distance={5}
-        color="#45ff78"
+        intensity={1.2}
+        distance={3.2}
+        color="#2b7548"
       />
     </group>
   );
@@ -826,14 +829,22 @@ const Clutter = () => (
   </group>
 );
 
-// ---- Camera Controller (Breathing, Mouse Look & Cinematic Zoom) ----
-const CameraController = ({ target, onReachedTarget }) => {
+// ---- Camera Controller (Breathing, Mouse Look & Dynamic Optical Zoom) ----
+const CameraController = ({ target, onReachedTarget, isCamcorderActive, zoomLevel = 1.0 }) => {
   const { camera, clock } = useThree();
   const basePos = new THREE.Vector3(0, 3.5, 4);
 
   useFrame((state) => {
     const time = clock.getElapsedTime();
     const breathing = Math.sin(time * 1.5) * 0.05; // Efecto respiración
+
+    // Zoom óptico analógico dinámico: reduce el FOV para ampliar la vista como en Outlast
+    const baseFov = 60;
+    const targetFov = isCamcorderActive ? baseFov / zoomLevel : baseFov;
+    if (Math.abs(camera.fov - targetFov) > 0.02) {
+      camera.fov = THREE.MathUtils.lerp(camera.fov, targetFov, 0.16);
+      camera.updateProjectionMatrix();
+    }
 
     if (target === 'none') {
       const targetX = (state.pointer.x * Math.PI) / 5;
@@ -930,6 +941,7 @@ export default function DesktopScene() {
   const [activeOverlay, setActiveOverlay] = useState('none');
   const [isCamcorderActive, setIsCamcorderActive] = useState(false);
   const [isCameraTransitioning, setIsCameraTransitioning] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1.0);
 
   const handleOpen = (target) => {
     setAnimatingTo(target);
@@ -952,6 +964,7 @@ export default function DesktopScene() {
       // Activar efecto cinemático de parpadeo a negro de 1 segundo
       setIsCameraTransitioning(true);
       setIsCamcorderActive(true);
+      setZoomLevel(1.0); // Reset de zoom al coger la cámara
 
       setTimeout(() => {
         setIsCameraTransitioning(false);
@@ -960,12 +973,30 @@ export default function DesktopScene() {
       // Bajar la videocámara
       setIsCameraTransitioning(true);
       setIsCamcorderActive(false);
+      setZoomLevel(1.0);
 
       setTimeout(() => {
         setIsCameraTransitioning(false);
       }, 400);
     }
   };
+
+  // Zoom interactivo con la rueda del ratón (Scroll) mientras la videocámara está levantada
+  useEffect(() => {
+    if (!isCamcorderActive) return;
+
+    const handleWheel = (e) => {
+      e.preventDefault();
+      setZoomLevel((prev) => {
+        const delta = e.deltaY > 0 ? -0.18 : 0.18;
+        const next = Math.min(2.8, Math.max(1.0, prev + delta));
+        return parseFloat(next.toFixed(2));
+      });
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    return () => window.removeEventListener('wheel', handleWheel);
+  }, [isCamcorderActive]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -986,17 +1017,23 @@ export default function DesktopScene() {
       <div className="w-full h-full">
         <Canvas camera={{ position: [0, 3.5, 4], fov: 60 }}>
           <color attach="background" args={['#010101']} />
-          <fog attach="fog" args={['#010101', 3, 14]} />
+          <fog attach="fog" args={['#010101', 3, isCamcorderActive ? 18 : 14]} />
 
-          <ambientLight intensity={0.16} color="#8ba0c2" />
-          <hemisphereLight args={['#526279', '#160b08', 0.34]} />
-          <UnstableDeskLight />
-          {/* Rebote frío mínimo para conservar lectura en las zonas oscuras */}
-          <pointLight position={[-5, 1.5, -1]} intensity={13} distance={7} color="#38506d" />
-          <pointLight position={[-3.8, 1.15, 0.7]} intensity={16} distance={4.6} color="#d7a76d" />
+          {/* En visión nocturna, las luces ambientales se reducen a casi cero para crear el contraste terrorífico de Outlast */}
+          <ambientLight intensity={isCamcorderActive ? 0.03 : 0.16} color="#8ba0c2" />
+          <hemisphereLight args={['#526279', '#160b08', isCamcorderActive ? 0.04 : 0.34]} />
+          {!isCamcorderActive && <UnstableDeskLight />}
 
-          {/* Linterna Infrarroja (IR Spotlight) que ilumina hacia donde mira el jugador */}
-          <CamcorderIRSpotlight active={isCamcorderActive} />
+          {/* Rebote frío sutil en modo normal */}
+          {!isCamcorderActive && (
+            <>
+              <pointLight position={[-5, 1.5, -1]} intensity={13} distance={7} color="#38506d" />
+              <pointLight position={[-3.8, 1.15, 0.7]} intensity={16} distance={4.6} color="#d7a76d" />
+            </>
+          )}
+
+          {/* Linterna Infrarroja (IR Spotlight) que ilumina hacia donde mira el jugador con zoom dinámico */}
+          <CamcorderIRSpotlight active={isCamcorderActive} zoom={zoomLevel} />
 
           <Room />
           <Suspense fallback={null}>
@@ -1017,6 +1054,8 @@ export default function DesktopScene() {
 
           <CameraController
             target={animatingTo}
+            isCamcorderActive={isCamcorderActive}
+            zoomLevel={zoomLevel}
             onReachedTarget={(target) => {
               if (activeOverlay !== target) setActiveOverlay(target);
             }}
@@ -1030,10 +1069,12 @@ export default function DesktopScene() {
         <div className="fixed inset-0 z-50 bg-black pointer-events-none animate-camera-blink" />
       )}
 
-      {/* Visión Nocturna y HUD de Videocámara Outlast */}
+      {/* Visión Nocturna y HUD de Videocámara Outlast (100% fiel a la referencia) */}
       <OutlastCamcorderOverlay
         isActive={isCamcorderActive}
         onToggleActive={handleToggleCamcorder}
+        zoom={zoomLevel}
+        onZoomChange={setZoomLevel}
         isDocumentOrTerminalOpen={activeOverlay !== 'none'}
       />
 
