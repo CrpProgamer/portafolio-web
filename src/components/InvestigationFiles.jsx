@@ -29,7 +29,7 @@ export default function InvestigationFiles() {
   const [decryptProgress, setDecryptProgress] = useState(0);
 
   const handleOpenFile = (fileId) => {
-    playBeep(1200, 0.1);
+    playBeep();
     setIsDecrypting(true);
     setDecryptProgress(0);
     
@@ -44,7 +44,7 @@ export default function InvestigationFiles() {
         setActiveFile(fileId);
       }
       setDecryptProgress(progress);
-      playBeep(400 + Math.random() * 400, 0.02);
+      playBeep();
     }, 150);
   };
 

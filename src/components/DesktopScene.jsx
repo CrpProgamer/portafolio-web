@@ -805,15 +805,6 @@ const Monitor = ({ onClick, isZooming, isScreenActive, onClose, onHover, onUnhov
     <group
       position={[-2, 1.5, -1]}
       rotation={[0, 0.2, 0]}
-      onClick={!isZooming && !isScreenActive ? onClick : null}
-      onPointerOver={() => {
-        setHovered(true);
-        if (onHover && !isZooming && !isScreenActive) onHover('terminal');
-      }}
-      onPointerOut={() => {
-        setHovered(false);
-        if (onUnhover) onUnhover();
-      }}
     >
       {/* Base pesada, cuello articulado y carcasa con profundidad */}
       <RoundedBox args={[1.72, 0.14, 1.08]} radius={0.05} smoothness={2} position={[0, -1.45, 0.04]} castShadow receiveShadow>
@@ -843,20 +834,43 @@ const Monitor = ({ onClick, isZooming, isScreenActive, onClose, onHover, onUnhov
         <meshBasicMaterial color="#3585ff" />
       </Box>
 
-      {/* Luz ambiente emitida por la pantalla azul de Windows XP sobre el escritorio */}
+      {/* Luz ambiente emitida por la pantalla sobre el escritorio */}
       <pointLight position={[0, 0, 0.9]} intensity={1.8} distance={5} color="#2a68e8" />
 
-      {/* Pantalla Interactiva Windows XP alojada físicamente en el monitor */}
+      {/* Plano invisible 3D para capturar hover y click cuando no está en zoom sin interferir con Html */}
+      {!isScreenActive && (
+        <Plane
+          args={[3.1, 1.9]}
+          position={[0, 0.02, 0.286]}
+          onClick={!isZooming ? onClick : null}
+          onPointerOver={(e) => {
+            e.stopPropagation();
+            setHovered(true);
+            if (onHover && !isZooming) onHover('terminal');
+          }}
+          onPointerOut={() => {
+            setHovered(false);
+            if (onUnhover) onUnhover();
+          }}
+        >
+          <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+        </Plane>
+      )}
+
+      {/* Pantalla Interactiva alojada físicamente en el monitor */}
       <group position={[0, 0.02, 0.282]}>
         <Html
           transform
           position={[0, 0, 0]}
           scale={0.11953}
-          wrapperClass="xp-screen-container"
+          pointerEvents={isScreenActive ? 'auto' : 'none'}
+          wrapperClass={`xp-screen-container ${isScreenActive ? 'pointer-events-auto' : 'pointer-events-none'}`}
         >
           <div
             style={{ width: '1024px', height: '629px' }}
-            className="rounded-sm overflow-hidden select-none shadow-2xl"
+            className={`rounded-sm overflow-hidden select-none shadow-2xl ${
+              isScreenActive ? 'pointer-events-auto' : 'pointer-events-none'
+            }`}
           >
             <WindowsXPScreen
               isZoomedIn={isScreenActive}
@@ -1256,7 +1270,8 @@ const CameraController = ({
       // Interpolación suave hacia el nuevo ángulo de 90° (baseYaw)
       currentYaw.current = THREE.MathUtils.lerp(currentYaw.current, baseYaw, 0.08);
 
-      camera.rotation.y = currentYaw.current - targetX + tremorX;
+      const targetYaw = currentYaw.current - targetX + tremorX;
+      camera.rotation.y = THREE.MathUtils.lerp(camera.rotation.y, targetYaw, 0.08);
       camera.rotation.x = THREE.MathUtils.lerp(camera.rotation.x, targetY + tremorY, 0.08);
 
       // Respiración más agitada e irregular en visión nocturna
@@ -1308,7 +1323,6 @@ export default function DesktopScene() {
   const [isCameraTransitioning, setIsCameraTransitioning] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [baseYaw, setBaseYaw] = useState(0); // Ángulo base de rotación en pasos de 90°
-  const [nearEdge, setNearEdge] = useState(null); // 'left' | 'right' | null
   const lastTurnTime = useRef(0);
 
   const playTurnSound = () => {
@@ -1397,41 +1411,7 @@ export default function DesktopScene() {
     return () => window.removeEventListener('wheel', handleWheel);
   }, [isCamcorderActive]);
 
-  // Detección de límite izquierdo / derecho en la pantalla para activar giros de 90° con clic
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (activeOverlay !== 'none') {
-        setNearEdge(null);
-        return;
-      }
-      const normalizedX = (e.clientX / window.innerWidth) * 2 - 1;
-      if (normalizedX > 0.72) {
-        setNearEdge('right');
-      } else if (normalizedX < -0.72) {
-        setNearEdge('left');
-      } else {
-        setNearEdge(null);
-      }
-    };
 
-    const handleClick = (e) => {
-      if (activeOverlay !== 'none') return;
-      const normalizedX = (e.clientX / window.innerWidth) * 2 - 1;
-      if (normalizedX > 0.72) {
-        handleTurn('right');
-      } else if (normalizedX < -0.72) {
-        handleTurn('left');
-      }
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('click', handleClick);
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('click', handleClick);
-    };
-  }, [activeOverlay]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -1525,38 +1505,38 @@ export default function DesktopScene() {
         </Canvas>
       </div>
 
-      {/* Indicadores visuales interactivos de giro de 90° al llegar al límite de la pantalla */}
-      {activeOverlay === 'none' && animatingTo !== 'terminal' && (
+      {/* Indicadores visuales interactivos de giro de 90° (Solo la flecha, visibles siempre y en modo videocámara) */}
+      {activeOverlay === 'none' && animatingTo !== 'terminal' && !isInMainMenu && (
         <>
-          <div
+          <button
             onClick={(e) => {
               e.stopPropagation();
               handleTurn('left');
             }}
-            className={`fixed left-0 top-0 bottom-0 w-28 z-30 flex items-center justify-start pl-4 pointer-events-auto transition-all duration-300 cursor-w-resize select-none ${nearEdge === 'left' ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4 pointer-events-none'
-              }`}
-            title="Clic para girar 90° a la izquierda (o pulsa Q / ◀)"
+            className={`fixed left-4 sm:left-8 top-1/2 -translate-y-1/2 z-[45] w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold transition-all duration-200 hover:scale-110 active:scale-95 shadow-[0_0_20px_rgba(0,0,0,0.85)] backdrop-blur-sm cursor-pointer select-none border ${
+              isCamcorderActive
+                ? 'bg-black/80 border-[#3dff84]/70 text-[#3dff84] shadow-[0_0_15px_rgba(61,255,132,0.5)] opacity-85 hover:opacity-100'
+                : 'bg-black/75 border-white/30 hover:border-white text-white/80 hover:text-white opacity-70 hover:opacity-100'
+            }`}
+            title="Girar 90° a la izquierda (o pulsa Q / ◀)"
           >
-            <div className="bg-black/85 border border-[#3dff84]/50 text-[#3dff84] px-3.5 py-2 rounded-sm text-xs font-mono tracking-widest uppercase flex items-center gap-2 shadow-[0_0_20px_rgba(61,255,132,0.4)] backdrop-blur-sm animate-pulse">
-              <span className="text-base font-bold">◀</span>
-              <span className="hidden sm:inline">GIRAR 90°</span>
-            </div>
-          </div>
+            ◀
+          </button>
 
-          <div
+          <button
             onClick={(e) => {
               e.stopPropagation();
               handleTurn('right');
             }}
-            className={`fixed right-0 top-0 bottom-0 w-28 z-30 flex items-center justify-end pr-4 pointer-events-auto transition-all duration-300 cursor-e-resize select-none ${nearEdge === 'right' ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4 pointer-events-none'
-              }`}
-            title="Clic para girar 90° a la derecha (o pulsa E / ▶)"
+            className={`fixed right-4 sm:right-8 top-1/2 -translate-y-1/2 z-[45] w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold transition-all duration-200 hover:scale-110 active:scale-95 shadow-[0_0_20px_rgba(0,0,0,0.85)] backdrop-blur-sm cursor-pointer select-none border ${
+              isCamcorderActive
+                ? 'bg-black/80 border-[#3dff84]/70 text-[#3dff84] shadow-[0_0_15px_rgba(61,255,132,0.5)] opacity-85 hover:opacity-100'
+                : 'bg-black/75 border-white/30 hover:border-white text-white/80 hover:text-white opacity-70 hover:opacity-100'
+            }`}
+            title="Girar 90° a la derecha (o pulsa E / ▶)"
           >
-            <div className="bg-black/85 border border-[#3dff84]/50 text-[#3dff84] px-3.5 py-2 rounded-sm text-xs font-mono tracking-widest uppercase flex items-center gap-2 shadow-[0_0_20px_rgba(61,255,132,0.4)] backdrop-blur-sm animate-pulse">
-              <span className="hidden sm:inline">GIRAR 90°</span>
-              <span className="text-base font-bold">▶</span>
-            </div>
-          </div>
+            ▶
+          </button>
         </>
       )}
 

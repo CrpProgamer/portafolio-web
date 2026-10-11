@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import InvestigationFiles from './InvestigationFiles.jsx';
 
-// Reproducción de efectos de sonido Windows XP mediante archivos .wav
+// Reproducción de efectos de sonido mediante archivos .wav
 const playXPChime = () => {
   try {
     const audio = new Audio('/assets/sounds/xp_startup.wav');
@@ -18,25 +17,42 @@ const playXPClick = () => {
   } catch (err) {}
 };
 
-export default function WindowsXPScreen({ isZoomedIn = false, onZoomIn = () => { }, onClose = () => { } }) {
+const playTerminalBeep = () => {
+  try {
+    const audio = new Audio('/assets/sounds/terminal_beep.wav');
+    audio.volume = 0.45;
+    audio.play().catch(() => {});
+  } catch (err) {}
+};
+
+export default function WindowsXPScreen({ isZoomedIn = false, onZoomIn = () => {}, onClose = () => {} }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [username, setUsername] = useState('crojas');
   const [password, setPassword] = useState('');
-  const [currentTime, setCurrentTime] = useState('');
-  const [activeWindow, setActiveWindow] = useState('files'); // 'files' | 'terminal' | 'none'
-  const [isMinimized, setIsMinimized] = useState(false);
 
-  // Reloj digital para la bandeja del sistema de XP
+  // Estados de la consola interactiva (Foto de referencia Outlast)
+  const [commandInput, setCommandInput] = useState('');
+  const [consoleLogs, setConsoleLogs] = useState([
+    { type: 'header', text: 'Murkoff Analytics System Console {version 1.04}' },
+    { type: 'sub', text: '2026 Murkoff Corporation // Terminal: Cristóbal Rojas' },
+    { type: 'spacer' },
+    { type: 'prompt', text: '>SystemCheck  //Cristobal_Rojas' },
+    { type: 'ok', text: '[OK] NÚCLEO DE DATOS: MURKOFF BI OS v3.1 ACTIVO' },
+    { type: 'ok', text: '[OK] ANALISTA ASIGNADO: CRISTÓBAL A. ROJAS PÉREZ' },
+    { type: 'ok', text: '[OK] ESPECIALIDAD: INGENIERÍA DE DATOS & BUSINESS INTELLIGENCE' },
+    { type: 'ok', text: '[OK] PIPELINE ACTIVO: CASO COLCHAGUA (PYMES) CONECTADO' },
+    { type: 'ok', text: '[OK] STACK TÉCNICO: SQL, PYTHON, POWER BI, POSTGRESQL, ETL' },
+    { type: 'info', text: 'Escribe "ayuda" o "proyectos" para explorar expedientes clasificados.' },
+  ]);
+
+  const terminalEndRef = useRef(null);
+
   useEffect(() => {
-    const updateTime = () => {
-      const d = new Date();
-      setCurrentTime(d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-    };
-    updateTime();
-    const interval = setInterval(updateTime, 30000);
-    return () => clearInterval(interval);
-  }, []);
+    if (isLoggedIn && terminalEndRef.current) {
+      terminalEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [consoleLogs, isLoggedIn]);
 
   const handleLogin = (e) => {
     if (e) e.preventDefault();
@@ -49,8 +65,7 @@ export default function WindowsXPScreen({ isZoomedIn = false, onZoomIn = () => {
       playXPChime();
       setIsLoggedIn(true);
       setIsLoggingIn(false);
-      setActiveWindow('files');
-    }, 1100);
+    }, 950);
   };
 
   const handleLogoff = () => {
@@ -60,23 +75,97 @@ export default function WindowsXPScreen({ isZoomedIn = false, onZoomIn = () => {
     setPassword('');
   };
 
+  const executeCommand = (cmdText) => {
+    const cleanCmd = (cmdText || commandInput).trim().toLowerCase();
+    if (!cleanCmd) return;
+
+    playTerminalBeep();
+    const newLogs = [...consoleLogs, { type: 'input', text: `>${cmdText || commandInput}` }];
+
+    if (cleanCmd === 'ayuda' || cleanCmd === 'help') {
+      newLogs.push(
+        { type: 'info', text: 'COMANDOS DISPONIBLES EN TERMINAL MURKOFF:' },
+        { type: 'text', text: '  proyectos    - Ver expedientes de Caso Colchagua y análisis BI' },
+        { type: 'text', text: '  habilidades  - Listar stack técnico y tecnologías' },
+        { type: 'text', text: '  contacto     - Canales de comunicación directa' },
+        { type: 'text', text: '  limpiar      - Limpiar el búfer de la consola' },
+        { type: 'text', text: '  check        - Ejecutar diagnóstico del sistema' },
+        { type: 'text', text: '  salir        - Cerrar sesión y volver al login' }
+      );
+    } else if (cleanCmd === 'proyectos' || cleanCmd === 'projects') {
+      newLogs.push(
+        { type: 'highlight', text: '=== EXPEDIENTE PRINCIPAL: CASO COLCHAGUA (PYMES) ===' },
+        { type: 'text', text: '• Diagnóstico y transformación analítica para toma de decisiones.' },
+        { type: 'text', text: '• Pipeline ETL en Python con ingesta y normalización en PostgreSQL.' },
+        { type: 'text', text: '• Modelo Estrella optimizado con medidas DAX avanzadas.' },
+        { type: 'text', text: '• Dashboard interactivo en Power BI con KPIs de liquidez y margen.' },
+        { type: 'ok', text: '[ESTADO: EXPEDIENTE CLASIFICADO Y VERIFICADO POR CRISTÓBAL ROJAS]' }
+      );
+    } else if (cleanCmd === 'habilidades' || cleanCmd === 'skills') {
+      newLogs.push(
+        { type: 'highlight', text: '=== STACK TECNOLÓGICO & COMPETENCIAS ===' },
+        { type: 'text', text: '• Análisis de Datos: Power BI, DAX, Power Query, Excel Avanzado' },
+        { type: 'text', text: '• Bases de Datos: SQL Server, PostgreSQL, MySQL, Modelado Dimensional' },
+        { type: 'text', text: '• Programación & ETL: Python (Pandas, NumPy, SQLAlchemy), Pipelines' },
+        { type: 'text', text: '• Desarrollo Frontend & 3D: React, Three.js, Astro, Tailwind CSS' },
+        { type: 'ok', text: '[NIVEL DE HABILIDAD: PROFESIONAL COMPROBADO]' }
+      );
+    } else if (cleanCmd === 'contacto' || cleanCmd === 'contact') {
+      newLogs.push(
+        { type: 'highlight', text: '=== CANALES DE CONTACTO OFICIALES ===' },
+        { type: 'text', text: '• LinkedIn: https://www.linkedin.com' },
+        { type: 'text', text: '• GitHub: https://github.com/CrpProgamer' },
+        { type: 'text', text: '• Email: cristobal.rojas.perez@example.com' },
+        { type: 'info', text: 'Disponible para contratación y proyectos de Business Intelligence.' }
+      );
+    } else if (cleanCmd === 'limpiar' || cleanCmd === 'clear') {
+      setConsoleLogs([
+        { type: 'header', text: 'Murkoff Analytics System Console {version 1.04}' },
+        { type: 'prompt', text: '>SystemCheck  //Cristobal_Rojas' },
+      ]);
+      setCommandInput('');
+      return;
+    } else if (cleanCmd === 'check' || cleanCmd === 'systemcheck') {
+      newLogs.push(
+        { type: 'ok', text: '[OK] TODOS LOS SUBSISTEMAS OPERANDO AL 100%' },
+        { type: 'ok', text: '[OK] TELEMETRÍA DE DATOS ESTABLE' }
+      );
+    } else if (cleanCmd === 'salir' || cleanCmd === 'exit' || cleanCmd === 'logout') {
+      handleLogoff();
+      return;
+    } else {
+      newLogs.push({
+        type: 'error',
+        text: `Error: Comando desconocido "${cleanCmd}". Escribe "ayuda" para la lista de comandos.`,
+      });
+    }
+
+    setConsoleLogs(newLogs);
+    setCommandInput('');
+  };
+
+  const handleCommandSubmit = (e) => {
+    e.preventDefault();
+    executeCommand();
+  };
+
   return (
     <div
       className="w-full h-full relative overflow-hidden select-none bg-[#00138c] text-white flex flex-col font-sans"
       style={{
         boxShadow: 'inset 0 0 40px rgba(0,0,0,0.85)',
       }}
-      onClick={(e) => {
+      onClick={() => {
         if (!isZoomedIn) {
           onZoomIn();
         }
       }}
     >
-      {/* Overlay CRT analógico sutil sobre la pantalla del monitor */}
+      {/* Overlay CRT analógico de líneas de escaneo sobre el fósforo del monitor */}
       <div
-        className="absolute inset-0 pointer-events-none z-30 opacity-40"
+        className="absolute inset-0 pointer-events-none z-30 opacity-35"
         style={{
-          background: 'linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.12) 50%)',
+          background: 'linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.18) 50%)',
           backgroundSize: '100% 4px',
         }}
       />
@@ -100,7 +189,7 @@ export default function WindowsXPScreen({ isZoomedIn = false, onZoomIn = () => {
                   <span className="font-black italic drop-shadow-[0_2px_3px_rgba(0,0,0,0.9)]">Windows</span>
                   <span className="text-[#ff9015] font-black text-lg italic ml-1">XP</span>
                 </div>
-                <span className="text-xs text-blue-200 tracking-wider font-mono">Professional Edition // Murkoff Systems v3.1</span>
+                <span className="text-xs text-blue-200 tracking-wider font-mono">Professional // Murkoff Terminal v3.1</span>
               </div>
             </div>
 
@@ -141,14 +230,14 @@ export default function WindowsXPScreen({ isZoomedIn = false, onZoomIn = () => {
 
                     <div className="flex-1 min-w-0">
                       <div className="font-bold text-xl text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] truncate">
-                        Cristobal A. Rojas Perez
+                        Cristóbal A. Rojas Pérez
                       </div>
                       <div className="text-sm text-blue-200 font-medium mt-0.5">
                         Consultor de Software // Análisis BI
                       </div>
                       <div className="text-xs text-green-300 flex items-center gap-1.5 mt-1 font-mono">
                         <span className="inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                        SESIÓN ACTIVA PREVIA
+                        SESIÓN LISTA
                       </div>
                     </div>
                   </div>
@@ -197,7 +286,7 @@ export default function WindowsXPScreen({ isZoomedIn = false, onZoomIn = () => {
                     ) : (
                       <div className="text-xs text-[#ffd15c] mt-2 bg-black/35 px-3 py-1.5 rounded border border-[#ff9015]/30 flex items-center gap-2">
                         <span>💡</span>
-                        <span>Pista: <strong>Caso Colchagua</strong> (o haz clic en <strong>[➜]</strong> directamente para entrar)</span>
+                        <span>Haz clic en <strong>[➜]</strong> o pulsa <strong>Enter</strong> para acceder a la consola</span>
                       </div>
                     )}
                   </form>
@@ -216,7 +305,6 @@ export default function WindowsXPScreen({ isZoomedIn = false, onZoomIn = () => {
               className="flex items-center gap-3 px-4 py-2 rounded bg-black/20 hover:bg-white/15 text-white cursor-pointer transition-colors border border-white/20 shadow-sm"
               title="Apagar o volver a la vista del despacho"
             >
-              {/* Botón de apagado rojo cuadrado de XP */}
               <div className="w-7 h-7 bg-[#dc3545] rounded-sm flex items-center justify-center border border-white/60 text-xs font-black shadow">
                 ⏻
               </div>
@@ -224,148 +312,228 @@ export default function WindowsXPScreen({ isZoomedIn = false, onZoomIn = () => {
             </button>
 
             <div className="text-blue-200/70 text-xs font-mono">
-              (C) 2013 Murkoff Psychiatric Systems. Todos los derechos reservados.
+              (C) 2026 Murkoff Psychiatric Systems. Todos los derechos reservados.
             </div>
           </div>
         </div>
       ) : (
-        /* ================= ESCRITORIO WINDOWS XP (LOGUEADO) ================= */
+        /* ================= CONSOLA ESTILO OUTLAST TRAS INICIAR SESIÓN (Referencia de la foto) ================= */
         <div
-          className="flex-1 flex flex-col justify-between relative z-10"
+          className="flex-1 w-full h-full relative z-10 p-6 flex flex-col justify-between overflow-hidden select-none font-mono"
           style={{
-            background: 'linear-gradient(135deg, #1f4788 0%, #306eb5 40%, #5b9bd5 75%, #4682b4 100%)',
+            backgroundColor: '#2b475e', // Fondo de escritorio azul pizarra clásico de la captura
           }}
         >
-          {/* Fondo de colinas verdes estilizado Bliss con marca de agua Murkoff */}
-          <div className="absolute inset-0 pointer-events-none opacity-30 flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-7xl font-black text-black/25 tracking-widest font-mono">MURKOFF</div>
-              <div className="text-sm text-black/20 font-bold tracking-wider">MOUNT MASSIVE PSYCHIATRIC FACILITY</div>
+          {/* 1. VENTANA DE FONDO: "Morphogenic Engine POD 2" con diagnósticos en rojo (como en la foto) */}
+          <div
+            className="absolute top-4 right-4 w-[480px] h-[480px] bg-[#060a0d] border-2 border-[#c0c0c0] shadow-2xl flex flex-col z-0 pointer-events-none opacity-85"
+            style={{
+              boxShadow: 'inset 1px 1px 0px #ffffff, inset -1px -1px 0px #808080, 5px 5px 25px rgba(0,0,0,0.8)',
+            }}
+          >
+            {/* Barra de título clásica Windows gris */}
+            <div className="h-6 bg-[#c0c0c0] text-black text-xs font-bold px-2 flex items-center justify-between border-b border-[#808080]">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px]">⚙️</span>
+                <span className="tracking-wider">Morphogenic Engine POD 2 // Analytics</span>
+              </div>
+              <div className="flex items-center gap-0.5">
+                <span className="w-3.5 h-3.5 bg-[#c0c0c0] border border-[#808080] text-[9px] flex items-center justify-center leading-none">_</span>
+                <span className="w-3.5 h-3.5 bg-[#c0c0c0] border border-[#808080] text-[9px] flex items-center justify-center leading-none">⛶</span>
+                <span className="w-3.5 h-3.5 bg-[#c0c0c0] border border-[#808080] text-[9px] flex items-center justify-center leading-none">✕</span>
+              </div>
+            </div>
+
+            {/* Diagnóstico en rojo streaming idéntico a la imagen de Outlast */}
+            <div className="flex-1 p-3 text-red-600 font-mono text-[11px] leading-snug overflow-hidden flex flex-col justify-end">
+              <div className="text-xl font-black text-red-600 tracking-wider mb-2 animate-pulse">
+                SYSTEM ERROR // ACTIVE
+              </div>
+              <div className="opacity-90 space-y-0.5 text-[10px]">
+                <div>0:00 0EAC123:5F89A // MEM_INIT</div>
+                <div>0:00 0EAC123:9B41C // ETL_STREAM</div>
+                <div>2:00 AEEAC12:4409D // POD_ONLINE</div>
+                <div>391F 34F542E1 // BUFFER_SYNC</div>
+                <div>0:00 0EAC123:5F89A // DW_FACT_READY</div>
+                <div>2:00 AEEAC12:8871B // PBI_LINKED</div>
+                <div>0:00 0EAC123:5F89A // COLCHAGUA_OK</div>
+                <div className="text-red-500 font-bold">system/developer/analytics</div>
+                <div className="text-red-500 font-bold">system/developer/caso_colchagua</div>
+                <div className="text-red-500 font-bold">system/developer/data_lake</div>
+                <div className="text-red-500 font-bold">system/morphogenic/rojas_core</div>
+                <div className="text-red-500 font-bold">system/developer/power_bi</div>
+              </div>
             </div>
           </div>
 
-          {/* Iconos del Escritorio XP */}
-          <div className="flex-1 p-4 grid grid-cols-1 gap-4 w-28 pointer-events-auto">
-            <div
-              onClick={() => {
-                playXPClick();
-                setActiveWindow('files');
-                setIsMinimized(false);
-              }}
-              className="flex flex-col items-center gap-1 p-2 rounded hover:bg-white/20 cursor-pointer text-center group"
-            >
-              <div className="w-10 h-10 bg-gradient-to-tr from-amber-400 to-amber-200 rounded border border-amber-600 flex items-center justify-center text-xl shadow">
-                📁
+          {/* 2. VENTANA PRINCIPAL DE PRIMER PLANO: "Console" (100% idéntica a la captura de Outlast) */}
+          <div
+            className="relative z-10 w-[640px] max-w-[95%] h-[530px] bg-black border-2 border-[#d4d0c8] shadow-[0_20px_60px_rgba(0,0,0,0.95)] flex flex-col"
+            style={{
+              boxShadow: 'inset 2px 2px 0px #ffffff, inset -2px -2px 0px #808080, 8px 8px 35px rgba(0,0,0,0.9)',
+            }}
+          >
+            {/* Barra de Título Gris Clásica Windows con controles _ ⛶ ✕ */}
+            <div className="h-7 bg-[#c0c0c0] text-black text-xs font-bold px-2 flex items-center justify-between border-b-2 border-[#808080] select-none shrink-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-black font-mono text-sm leading-none">█</span>
+                <span className="tracking-wider text-black text-sm">Console</span>
               </div>
-              <span className="text-[11px] text-white font-medium drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] group-hover:bg-[#0055ea] px-1 rounded">
-                Expedientes Caso Colchagua
-              </span>
-            </div>
-
-            <div
-              onClick={() => {
-                playXPClick();
-                setActiveWindow('files');
-                setIsMinimized(false);
-              }}
-              className="flex flex-col items-center gap-1 p-2 rounded hover:bg-white/20 cursor-pointer text-center group"
-            >
-              <div className="w-10 h-10 bg-gradient-to-tr from-blue-500 to-cyan-300 rounded border border-blue-700 flex items-center justify-center text-xl shadow">
-                🖥️
-              </div>
-              <span className="text-[11px] text-white font-medium drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] group-hover:bg-[#0055ea] px-1 rounded">
-                Mi PC
-              </span>
-            </div>
-          </div>
-
-          {/* Ventana flotante estilo Windows XP que aloja InvestigationFiles */}
-          {activeWindow === 'files' && !isMinimized && (
-            <div className="absolute inset-x-6 top-4 bottom-10 z-20 flex flex-col rounded-t-lg shadow-[0_10px_35px_rgba(0,0,0,0.7)] border-2 border-[#0055ea] bg-[#0c120f] overflow-hidden">
-              {/* Barra de título azul XP con botón rojo de cerrar */}
-              <div className="h-8 bg-gradient-to-r from-[#0055ea] via-[#2a75f0] to-[#0055ea] px-3 flex items-center justify-between select-none shadow">
-                <div className="flex items-center gap-2 text-xs font-bold text-white drop-shadow">
-                  <span>📂</span>
-                  <span>SISTEMA DE ANÁLISIS DE DATOS // CASO COLCHAGUA (PYMES)</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => setIsMinimized(true)}
-                    className="w-5 h-5 bg-[#0044c0] hover:bg-[#2060e0] text-white text-[10px] font-bold rounded-sm border border-white/40 flex items-center justify-center cursor-pointer"
-                  >
-                    _
-                  </button>
-                  <button
-                    onClick={handleLogoff}
-                    className="w-5 h-5 bg-[#dc3545] hover:bg-[#ff4d5a] text-white text-[11px] font-bold rounded-sm border border-white/40 flex items-center justify-center cursor-pointer shadow"
-                    title="Cerrar y volver al login"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </div>
-
-              {/* Menú de herramientas clásico de Windows */}
-              <div className="h-6 bg-[#ece9d8] text-black text-[11px] px-3 flex items-center gap-4 border-b border-gray-300 font-sans">
-                <span className="hover:bg-blue-600 hover:text-white px-1 cursor-pointer">Archivo</span>
-                <span className="hover:bg-blue-600 hover:text-white px-1 cursor-pointer">Edición</span>
-                <span className="hover:bg-blue-600 hover:text-white px-1 cursor-pointer">Ver</span>
-                <span className="hover:bg-blue-600 hover:text-white px-1 cursor-pointer">Herramientas</span>
-                <span className="hover:bg-blue-600 hover:text-white px-1 cursor-pointer">Ayuda</span>
-              </div>
-
-              {/* Contenido interactivo: InvestigationFiles de Cristobal */}
-              <div className="flex-1 overflow-y-auto bg-[#030604] p-2 text-white">
-                <InvestigationFiles />
-              </div>
-            </div>
-          )}
-
-          {/* Barra de Tareas de Windows XP (Taskbar con botón verde Inicio) */}
-          <div className="h-9 bg-gradient-to-r from-[#245ddb] via-[#2a68e8] to-[#1642a8] border-t-2 border-[#3b82f6] flex items-center justify-between px-1 z-30 shadow-2xl">
-            <div className="flex items-center gap-1.5 h-full">
-              {/* Botón verde "Inicio" icónico con curvatura derecha */}
-              <button
-                onClick={handleLogoff}
-                className="h-full px-3.5 bg-gradient-to-r from-[#388e3c] to-[#4caf50] hover:from-[#43a047] hover:to-[#66bb6a] rounded-r-xl flex items-center gap-2 border-r-2 border-green-800 text-white font-bold italic text-sm shadow cursor-pointer transition-all"
-                title="Cerrar sesión / Salir"
-              >
-                <div className="w-4 h-4 flex flex-wrap gap-0.5 transform -rotate-12">
-                  <div className="w-1.5 h-1.5 bg-[#f35325] rounded-tl-sm" />
-                  <div className="w-1.5 h-1.5 bg-[#81bc06] rounded-tr-sm" />
-                  <div className="w-1.5 h-1.5 bg-[#05a6f0] rounded-bl-sm" />
-                  <div className="w-1.5 h-1.5 bg-[#ffba08] rounded-br-sm" />
-                </div>
-                <span>inicio</span>
-              </button>
-
-              {/* Pestaña de tarea abierta */}
-              {activeWindow === 'files' && (
+              <div className="flex items-center gap-1">
                 <button
-                  onClick={() => setIsMinimized(!isMinimized)}
-                  className={`h-7 px-3 text-xs flex items-center gap-2 rounded border font-medium cursor-pointer transition-all ${!isMinimized ? 'bg-[#1b4396] border-[#0f2a66] text-white shadow-inner' : 'bg-[#3b75e8] border-[#558cf4] text-white/90'
-                    }`}
+                  onClick={handleLogoff}
+                  className="w-4 h-4 bg-[#c0c0c0] hover:bg-[#d8d8d8] active:bg-[#a0a0a0] border border-[#808080] text-black text-[10px] font-bold flex items-center justify-center leading-none cursor-pointer"
+                  title="Minimizar"
                 >
-                  <span>📁</span>
-                  <span className="truncate max-w-[140px]">Expedientes Colchagua</span>
+                  _
                 </button>
-              )}
-            </div>
-
-            {/* Bandeja del sistema (System Tray) */}
-            <div className="h-full bg-[#0b80ef] px-3 flex items-center gap-3 border-l border-[#0860b8] text-[11px] font-sans">
-              <button
-                onClick={handleLogoff}
-                className="text-[10px] text-white hover:underline cursor-pointer font-bold"
-              >
-                [Cerrar sesión]
-              </button>
-              <div className="flex items-center gap-1.5 text-white/90">
-                <span>🛡️</span>
-                <span>🔊</span>
-                <span className="font-mono text-xs">{currentTime || '10:43 PM'}</span>
+                <button
+                  className="w-4 h-4 bg-[#c0c0c0] hover:bg-[#d8d8d8] active:bg-[#a0a0a0] border border-[#808080] text-black text-[10px] font-bold flex items-center justify-center leading-none cursor-pointer"
+                  title="Maximizar"
+                >
+                  ⛶
+                </button>
+                <button
+                  onClick={handleLogoff}
+                  className="w-4 h-4 bg-[#c0c0c0] hover:bg-red-500 hover:text-white active:bg-red-700 border border-[#808080] text-black text-[11px] font-bold flex items-center justify-center leading-none cursor-pointer"
+                  title="Cerrar sesión"
+                >
+                  ✕
+                </button>
               </div>
             </div>
+
+            {/* Cuerpo de la Consola: Fondo negro, texto blanco y scrollbar idéntica a la referencia */}
+            <div className="flex-1 bg-black text-white p-4 overflow-y-auto font-mono text-xs leading-relaxed flex flex-col justify-between">
+              <div className="space-y-1.5">
+                {consoleLogs.map((log, idx) => {
+                  if (log.type === 'header') {
+                    return (
+                      <div key={idx} className="font-bold text-white text-sm tracking-wide">
+                        {log.text}
+                      </div>
+                    );
+                  }
+                  if (log.type === 'sub') {
+                    return (
+                      <div key={idx} className="text-white/80 text-xs">
+                        {log.text}
+                      </div>
+                    );
+                  }
+                  if (log.type === 'prompt') {
+                    return (
+                      <div key={idx} className="text-white font-bold text-sm pt-2">
+                        {log.text}
+                      </div>
+                    );
+                  }
+                  if (log.type === 'ok') {
+                    return (
+                      <div key={idx} className="text-green-400 font-medium">
+                        {log.text}
+                      </div>
+                    );
+                  }
+                  if (log.type === 'highlight') {
+                    return (
+                      <div key={idx} className="text-[#38bdf8] font-bold pt-1">
+                        {log.text}
+                      </div>
+                    );
+                  }
+                  if (log.type === 'info') {
+                    return (
+                      <div key={idx} className="text-yellow-300 font-medium pt-1">
+                        {log.text}
+                      </div>
+                    );
+                  }
+                  if (log.type === 'error') {
+                    return (
+                      <div key={idx} className="text-red-400 font-medium">
+                        {log.text}
+                      </div>
+                    );
+                  }
+                  if (log.type === 'input') {
+                    return (
+                      <div key={idx} className="text-white font-bold pt-1">
+                        {log.text}
+                      </div>
+                    );
+                  }
+                  return (
+                    <div key={idx} className="text-white/90">
+                      {log.text}
+                    </div>
+                  );
+                })}
+                <div ref={terminalEndRef} />
+              </div>
+
+              {/* Entrada interactiva de comandos con cursor parpadeante */}
+              <div className="pt-3 border-t border-white/20 mt-3">
+                <form onSubmit={handleCommandSubmit} className="flex items-center gap-2">
+                  <span className="text-white font-bold text-sm">{'>'}</span>
+                  <input
+                    type="text"
+                    value={commandInput}
+                    onChange={(e) => setCommandInput(e.target.value)}
+                    placeholder="Escribe un comando (ej: proyectos, ayuda)..."
+                    className="flex-1 bg-transparent text-white font-mono text-xs focus:outline-none placeholder:text-white/40"
+                    autoFocus
+                  />
+                  <button
+                    type="submit"
+                    className="px-2 py-0.5 bg-white/10 hover:bg-white/25 border border-white/30 text-[10px] text-white cursor-pointer uppercase font-mono"
+                  >
+                    EJECUTAR
+                  </button>
+                </form>
+
+                {/* Accesos rápidos de un clic para comodidad del usuario */}
+                <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-white/10 text-[10px]">
+                  <span className="text-white/40 self-center">ACCESOS RÁPIDOS:</span>
+                  {['proyectos', 'habilidades', 'contacto', 'check', 'limpiar'].map((cmd) => (
+                    <button
+                      key={cmd}
+                      onClick={() => executeCommand(cmd)}
+                      className="px-2 py-0.5 bg-white/5 hover:bg-white/20 border border-white/20 text-white/80 hover:text-white rounded-xs cursor-pointer uppercase transition-colors"
+                    >
+                      [{cmd}]
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 3. BARRA INFERIOR DEL SISTEMA (Botones para cerrar sesión o salir de la pantalla) */}
+          <div className="relative z-10 w-full flex justify-between items-center bg-[#1e3447]/90 border border-white/20 px-4 py-2 rounded text-xs text-white shadow-lg backdrop-blur-sm mt-4">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleLogoff}
+                className="px-3 py-1 bg-red-900/80 hover:bg-red-800 border border-red-500 text-white font-bold rounded-xs cursor-pointer transition-colors shadow"
+                title="Cerrar sesión actual en el sistema"
+              >
+                ← CERRAR SESIÓN
+              </button>
+              <span className="text-white/60 text-[11px]">
+                USUARIO: <strong>CRISTOBAL ROJAS</strong> // NIVEL 3
+              </span>
+            </div>
+
+            <button
+              onClick={() => {
+                playXPClick();
+                onClose();
+              }}
+              className="px-4 py-1 bg-black/60 hover:bg-white/15 border border-white/30 text-white font-bold rounded-xs cursor-pointer transition-colors shadow"
+              title="Alejar la vista y volver al despacho 3D"
+            >
+              [⏻ SALIR DEL MONITOR]
+            </button>
           </div>
         </div>
       )}
