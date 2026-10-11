@@ -159,25 +159,7 @@ export default function OutlastCamcorderOverlay({
           }}
         />
 
-        {/* 2. Color Grading de Fósforo P43 / IR con contraste tétrico auténtico */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backdropFilter: 'contrast(1.24) brightness(1.05) saturate(0.60) hue-rotate(58deg)',
-            WebkitBackdropFilter: 'contrast(1.24) brightness(1.05) saturate(0.60) hue-rotate(58deg)',
-          }}
-        />
-
-        {/* 3. Tinte verde fosforescente militar analógico */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background: 'rgba(16, 56, 30, 0.18)',
-            mixBlendMode: 'color-dodge',
-          }}
-        />
-
-        {/* 4. Ruido/Estática de sensor analógico fino de alta frecuencia */}
+        {/* 2. Ruido/Estática de sensor analógico fino de alta frecuencia */}
         <div
           className="absolute inset-0 mix-blend-overlay outlast-grain-animation pointer-events-none"
           style={{

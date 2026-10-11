@@ -1453,7 +1453,7 @@ export default function DesktopScene() {
 
   return (
     <div className="w-screen h-screen relative bg-black overflow-hidden outlast-cursor">
-      <div className="w-full h-full">
+      <div className={`w-full h-full ${isCamcorderActive ? 'outlast-nightvision-viewport' : ''}`}>
         <Canvas camera={{ position: [0, 3.5, 4], fov: 60 }}>
           <color attach="background" args={['#020403']} />
           <fog attach="fog" args={['#020503', 2.0, isCamcorderActive ? 16 : 13]} />

@@ -97,6 +97,12 @@
   100% { opacity: 0; }
 }
 
+/* Filtro de Visión Nocturna Auténtico de Outlast (Transforma la vista 3D + Pantalla de Windows XP en fósforo verde militar P43) */
+.outlast-nightvision-viewport {
+  filter: contrast(1.35) brightness(1.10) sepia(1) hue-rotate(82deg) saturate(2.4);
+  transition: filter 0.15s ease-out;
+}
+
 /* Cursor icónico de Outlast: flecha negra con contorno blanco nítido */
 html, body, div, button, a, [role="button"], input, select, textarea {
   cursor: url('/assets/cursor_outlast.svg') 2 2, auto !important;
