@@ -9,49 +9,52 @@ import WindowsXPScreen from './WindowsXPScreen.jsx';
 
 // ---- 3D Models & Enclosed Asylum Office ----
 const AsylumDoor = () => (
-  <group position={[6.2, -0.8, -5.14]}>
-    {/* Marco metálico de la puerta pesada de manicomio asentado sobre el suelo */}
-    <Box args={[3.0, 6.4, 0.24]} position={[0, 0, 0]} castShadow receiveShadow>
+  <group position={[6.2, -0.35, -5.14]}>
+    {/* Marco metálico de la puerta pesada de manicomio (desde el suelo y = -4 hasta y = 3.3, a la misma altura del tablero) */}
+    <Box args={[3.4, 7.3, 0.26]} position={[0, 0, 0]} castShadow receiveShadow>
       <meshStandardMaterial color="#141816" roughness={0.7} metalness={0.6} />
     </Box>
-    {/* Hoja de la puerta de madera maciza hospitalaria (desde el suelo y = -4 hasta y = 2.4) */}
-    <Box args={[2.68, 6.08, 0.14]} position={[0, -0.05, 0.05]} castShadow receiveShadow>
+    {/* Hoja de la puerta de madera maciza hospitalaria blindada */}
+    <Box args={[3.06, 6.98, 0.16]} position={[0, -0.06, 0.05]} castShadow receiveShadow>
       <meshStandardMaterial color="#2c221a" roughness={0.85} metalness={0.1} />
     </Box>
     {/* Plancha de protección de acero en la parte inferior descansando directamente en el suelo */}
-    <Box args={[2.64, 1.4, 0.16]} position={[0, -2.35, 0.06]} castShadow receiveShadow>
+    <Box args={[3.02, 1.8, 0.18]} position={[0, -2.65, 0.06]} castShadow receiveShadow>
       <meshStandardMaterial color="#3a3d3a" roughness={0.5} metalness={0.8} />
     </Box>
-    {/* Ventana de observación rectangular con barras situada a la altura de los ojos */}
-    <group position={[0, 0.85, 0.06]}>
-      <Box args={[0.8, 1.3, 0.16]}>
+    {/* Ventana de observación rectangular con barras a la altura natural de los ojos */}
+    <group position={[0, 1.55, 0.06]}>
+      <Box args={[0.88, 1.45, 0.18]}>
         <meshStandardMaterial color="#0b0e0c" roughness={0.4} />
       </Box>
       {/* Cristal reforzado esmerilado */}
-      <Plane args={[0.64, 1.14]} position={[0, 0, 0.09]}>
+      <Plane args={[0.72, 1.28]} position={[0, 0, 0.09]}>
         <meshStandardMaterial color="#2d4251" roughness={0.3} metalness={0.4} transparent opacity={0.85} />
       </Plane>
       {/* Barrotes de seguridad */}
-      {[-0.2, 0, 0.2].map((x, i) => (
-        <Box key={i} args={[0.03, 1.14, 0.03]} position={[x, 0, 0.11]}>
+      {[-0.22, 0, 0.22].map((x, i) => (
+        <Box key={i} args={[0.035, 1.28, 0.035]} position={[x, 0, 0.11]}>
           <meshStandardMaterial color="#1a1a1a" metalness={0.85} roughness={0.3} />
         </Box>
       ))}
     </group>
-    {/* Manija pesada y cerradura ergonómica */}
-    <Box args={[0.1, 0.45, 0.18]} position={[-1.05, -0.25, 0.12]} castShadow>
+    {/* Barra antipánico / manija pesada industrial de manicomio */}
+    <Box args={[0.12, 0.55, 0.2]} position={[-1.2, 0.05, 0.12]} castShadow>
       <meshStandardMaterial color="#a0a5a0" metalness={0.85} roughness={0.35} />
     </Box>
-    {/* Letrero institucional de Murkoff */}
-    <Plane args={[1.8, 0.32]} position={[0, 2.75, 0.12]}>
+    <Box args={[2.4, 0.08, 0.14]} position={[0, 0.05, 0.12]} castShadow>
+      <meshStandardMaterial color="#787e78" metalness={0.8} roughness={0.3} />
+    </Box>
+    {/* Letrero institucional de Murkoff en la parte superior */}
+    <Plane args={[2.0, 0.36]} position={[0, 2.85, 0.12]}>
       <meshStandardMaterial color="#0c0e0c" roughness={0.5} />
     </Plane>
-    <Text position={[0, 2.75, 0.13]} fontSize={0.11} color="#e6dec8">
+    <Text position={[0, 2.85, 0.13]} fontSize={0.13} color="#e6dec8">
       PABELLÓN D // CONSULTA 04
     </Text>
     {/* Haz frío de luz que se filtra por debajo y por la mirilla desde el pasillo exterior del pabellón */}
-    <pointLight position={[0, -3.2, 0.4]} intensity={4.5} distance={4.2} color="#1d4d3d" />
-    <pointLight position={[0, 0.85, 0.3]} intensity={2.4} distance={2.8} color="#5e1212" />
+    <pointLight position={[0, -3.5, 0.4]} intensity={4.5} distance={4.2} color="#1d4d3d" />
+    <pointLight position={[0, 1.55, 0.3]} intensity={2.4} distance={2.8} color="#5e1212" />
   </group>
 );
 
@@ -580,8 +583,8 @@ const Room = ({ isCamcorderActive = false }) => (
       <meshStandardMaterial color="#070908" roughness={0.7} metalness={0.3} />
     </Box>
 
-    {/* Rótulo de SALIDA iluminado en rojo sobre la puerta pesada */}
-    <AsylumExitSign position={[6.2, 2.75, -5.12]} />
+    {/* Rótulo de SALIDA iluminado en rojo sobre la puerta pesada (ahora a y = 3.7 directamente sobre el marco) */}
+    <AsylumExitSign position={[6.2, 3.7, -5.12]} />
 
     {/* Mensajes en sangre de pacientes / Padre Martin sobre los muros */}
     <BloodWallWritings />
