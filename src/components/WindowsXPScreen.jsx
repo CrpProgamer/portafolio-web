@@ -106,96 +106,106 @@ export default function WindowsXPScreen({ isZoomedIn = false, onZoomIn = () => {
     >
       {/* Overlay CRT analógico sutil sobre la pantalla del monitor */}
       <div
-        className="absolute inset-0 pointer-events-none z-30"
+        className="absolute inset-0 pointer-events-none z-30 opacity-40"
         style={{
-          background: 'linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03))',
-          backgroundSize: '100% 3px, 4px 100%',
+          background: 'linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.12) 50%)',
+          backgroundSize: '100% 4px',
         }}
       />
 
       {!isLoggedIn ? (
         /* ================= PANTALLA DE INICIO DE SESIÓN WINDOWS XP ================= */
-        <div className="flex-1 flex flex-col justify-between bg-gradient-to-b from-[#001170] via-[#00289a] to-[#001170] relative z-10">
+        <div className="flex-1 flex flex-col justify-between bg-gradient-to-b from-[#001384] via-[#002ca6] to-[#001384] relative z-10 w-full h-full">
           {/* Barra superior clásica de Windows XP */}
-          <div className="h-16 bg-[#001584] border-b-[3px] border-[#d87c10] flex items-center justify-between px-8 shadow-md">
-            <div className="flex items-center gap-3">
+          <div className="h-20 bg-[#001584] border-b-[4px] border-[#d87c10] flex items-center justify-between px-10 shadow-lg shrink-0">
+            <div className="flex items-center gap-4">
               {/* Logotipo de bandera Windows 4 colores */}
-              <div className="w-8 h-8 flex flex-wrap gap-0.5 transform -rotate-12">
-                <div className="w-3.5 h-3.5 bg-[#f35325] rounded-tl-sm shadow-sm" />
-                <div className="w-3.5 h-3.5 bg-[#81bc06] rounded-tr-sm shadow-sm" />
-                <div className="w-3.5 h-3.5 bg-[#05a6f0] rounded-bl-sm shadow-sm" />
-                <div className="w-3.5 h-3.5 bg-[#ffba08] rounded-br-sm shadow-sm" />
+              <div className="w-10 h-10 flex flex-wrap gap-1 transform -rotate-12 filter drop-shadow">
+                <div className="w-4 h-4 bg-[#f35325] rounded-tl-sm shadow-sm" />
+                <div className="w-4 h-4 bg-[#81bc06] rounded-tr-sm shadow-sm" />
+                <div className="w-4 h-4 bg-[#05a6f0] rounded-bl-sm shadow-sm" />
+                <div className="w-4 h-4 bg-[#ffba08] rounded-br-sm shadow-sm" />
               </div>
               <div className="flex flex-col leading-tight">
-                <div className="text-xl font-bold tracking-tight text-white flex items-center gap-1">
-                  <span>Microsoft</span>
-                  <span className="text-white font-extrabold italic drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">Windows</span>
-                  <span className="text-[#ff9015] font-black text-sm italic ml-0.5">XP</span>
+                <div className="text-2xl font-bold tracking-tight text-white flex items-center gap-1.5">
+                  <span className="font-light">Microsoft</span>
+                  <span className="font-black italic drop-shadow-[0_2px_3px_rgba(0,0,0,0.9)]">Windows</span>
+                  <span className="text-[#ff9015] font-black text-lg italic ml-1">XP</span>
                 </div>
-                <span className="text-[10px] text-blue-200 uppercase tracking-widest font-mono">Professional // Murkoff Systems v3.1</span>
+                <span className="text-xs text-blue-200 tracking-wider font-mono">Professional Edition // Murkoff Systems v3.1</span>
               </div>
             </div>
 
-            <div className="text-right text-xs text-blue-200/80 font-mono hidden sm:block">
+            <div className="text-right text-xs text-blue-200/90 font-mono tracking-widest bg-black/30 px-4 py-1.5 rounded border border-white/10">
               ESTACIÓN: MT-MASSIVE // TERM-04
             </div>
           </div>
 
-          {/* Área Central: Paneles divididos con el usuario y contraseña */}
-          <div className="flex-1 flex items-center justify-center px-6 py-4">
-            <div className="w-full max-w-2xl flex items-center justify-center gap-8">
-              {/* Columna Izquierda: Instrucción de bienvenida */}
-              <div className="w-1/2 text-right border-r-2 border-white/20 pr-8 hidden md:block">
-                <h3 className="text-xl font-semibold text-white drop-shadow mb-2">Para comenzar</h3>
-                <p className="text-sm text-blue-200 leading-relaxed">
-                  Haga clic en su nombre de usuario e ingrese sus credenciales de seguridad de Murkoff Corporation.
+          {/* Área Central: Paneles divididos con la línea divisoria vertical brillante de XP */}
+          <div className="flex-1 flex items-center justify-center px-10 py-6 relative">
+            <div className="w-full max-w-4xl flex items-center justify-center gap-10">
+              {/* Columna Izquierda: Mensaje de bienvenida oficial */}
+              <div className="w-1/2 text-right pr-10 flex flex-col items-end justify-center select-none">
+                <h2 className="text-3xl font-normal text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] mb-1">
+                  Para comenzar,
+                </h2>
+                <p className="text-xl font-light text-blue-100 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] mb-6">
+                  haga clic en su nombre de usuario
                 </p>
-                <div className="mt-4 text-xs text-blue-300/60 font-mono">
-                  ACCESO AUTORIZADO NIVEL 3
+                <div className="bg-black/30 border border-blue-400/30 rounded px-4 py-2 text-right">
+                  <div className="text-xs text-blue-300 font-mono font-semibold">MURKOFF PSYCHIATRIC SYSTEMS</div>
+                  <div className="text-[11px] text-blue-200/70 font-mono">AUTORIZACIÓN DE SEGURIDAD // NIVEL 3</div>
                 </div>
               </div>
 
-              {/* Columna Derecha: Tarjeta de Usuario con inputs */}
-              <div className="w-full md:w-1/2 flex flex-col justify-center">
-                <div className="bg-[#001d8f]/80 p-4 rounded-lg border-2 border-[#ff9015] shadow-2xl backdrop-blur-sm transition-all hover:bg-[#0024aa]">
-                  <div className="flex items-center gap-4 mb-3">
-                    {/* Avatar con borde naranja clásico */}
-                    <div className="w-14 h-14 rounded-md border-2 border-white/90 bg-gradient-to-tr from-[#1b3d73] to-[#4c7fd4] flex items-center justify-center shadow-md overflow-hidden relative">
-                      <div className="w-7 h-7 rounded-full bg-white/90 mb-1" />
-                      <div className="absolute bottom-0 w-11 h-6 rounded-t-full bg-white/80" />
+              {/* Divisor vertical con degradado blanco suave idéntico a XP */}
+              <div className="w-[2px] h-64 bg-gradient-to-b from-transparent via-white/50 to-transparent shrink-0" />
+
+              {/* Columna Derecha: Tarjeta de Usuario con avatar e inputs destacados */}
+              <div className="w-1/2 pl-6 flex flex-col justify-center">
+                <div className="bg-[#0022a8]/85 p-6 rounded-xl border-2 border-[#ff9015] shadow-[0_15px_40px_rgba(0,0,0,0.7)] backdrop-blur-md transition-all">
+                  <div className="flex items-center gap-5 mb-4">
+                    {/* Avatar con marco naranja clásico de Windows XP */}
+                    <div className="w-20 h-20 rounded-lg border-2 border-[#ff9015] bg-gradient-to-tr from-[#1b3d73] to-[#4c7fd4] flex items-center justify-center shadow-lg overflow-hidden relative shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-white/95 mb-2 shadow" />
+                      <div className="absolute bottom-0 w-16 h-8 rounded-t-full bg-white/90 shadow" />
                     </div>
 
-                    <div className="flex-1">
-                      <div className="font-bold text-base text-white drop-shadow">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-bold text-xl text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] truncate">
                         Cristobal A. Rojas Perez
                       </div>
-                      <div className="text-xs text-blue-200">
-                        Consultor de Software // Análisis
+                      <div className="text-sm text-blue-200 font-medium mt-0.5">
+                        Consultor de Software // Análisis BI
+                      </div>
+                      <div className="text-xs text-green-300 flex items-center gap-1.5 mt-1 font-mono">
+                        <span className="inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                        SESIÓN ACTIVA PREVIA
                       </div>
                     </div>
                   </div>
 
                   {/* Formulario de Login */}
-                  <form onSubmit={handleLogin} className="space-y-2 mt-2" onClick={(e) => e.stopPropagation()}>
+                  <form onSubmit={handleLogin} className="space-y-3 mt-3" onClick={(e) => e.stopPropagation()}>
                     <div>
-                      <label className="block text-[11px] text-blue-200 mb-0.5">Usuario:</label>
+                      <label className="block text-xs text-blue-100 font-medium mb-1">Nombre de usuario:</label>
                       <input
                         type="text"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        className="w-full px-2 py-1 bg-white text-black font-sans text-xs rounded border border-blue-400 focus:outline-none focus:ring-2 focus:ring-[#ff9015]"
+                        className="w-full px-3 py-1.5 bg-white text-black font-sans text-sm rounded-xs border-2 border-blue-400 focus:outline-none focus:ring-2 focus:ring-[#ff9015] shadow-inner font-medium"
                         placeholder="Nombre de usuario"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[11px] text-blue-200 mb-0.5">Contraseña:</label>
-                      <div className="flex items-center gap-1.5">
+                      <label className="block text-xs text-blue-100 font-medium mb-1">Escriba su contraseña:</label>
+                      <div className="flex items-center gap-2">
                         <input
                           type="password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="flex-1 px-2 py-1 bg-white text-black font-sans text-xs rounded border border-blue-400 focus:outline-none focus:ring-2 focus:ring-[#ff9015]"
+                          className="flex-1 px-3 py-1.5 bg-white text-black font-sans text-sm rounded-xs border-2 border-blue-400 focus:outline-none focus:ring-2 focus:ring-[#ff9015] shadow-inner tracking-widest font-bold"
                           placeholder="••••••••"
                           autoFocus={isZoomedIn}
                         />
@@ -203,22 +213,23 @@ export default function WindowsXPScreen({ isZoomedIn = false, onZoomIn = () => {
                         <button
                           type="submit"
                           disabled={isLoggingIn}
-                          className="w-7 h-7 bg-[#28a745] hover:bg-[#34c759] active:bg-[#1e7e34] text-white rounded flex items-center justify-center border border-white/40 shadow cursor-pointer transition-transform hover:scale-105"
-                          title="Iniciar sesión"
+                          className="w-10 h-10 bg-gradient-to-b from-[#3ed05e] to-[#24963e] hover:from-[#49e26b] hover:to-[#2cb048] active:from-[#1e7e34] active:to-[#176228] text-white rounded flex items-center justify-center border border-white/60 shadow-md cursor-pointer transition-transform hover:scale-105 shrink-0"
+                          title="Iniciar sesión (o pulsa Enter)"
                         >
-                          <span className="text-xs font-bold leading-none">➜</span>
+                          <span className="text-base font-black leading-none drop-shadow">➜</span>
                         </button>
                       </div>
                     </div>
 
                     {isLoggingIn ? (
-                      <div className="text-xs text-[#ffba08] font-semibold mt-2 animate-pulse flex items-center gap-1.5">
-                        <span className="inline-block w-2 h-2 rounded-full bg-[#ffba08]" />
-                        Iniciando sesión en Murkoff Corp...
+                      <div className="text-sm text-[#ffba08] font-bold mt-2 animate-pulse flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded">
+                        <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#ffba08]" />
+                        Iniciando sesión en Murkoff Systems...
                       </div>
                     ) : (
-                      <div className="text-[10px] text-blue-300/70 mt-1.5">
-                        Pista: Caso Colchagua (o pulsa [➜] directamente para entrar)
+                      <div className="text-xs text-[#ffd15c] mt-2 bg-black/35 px-3 py-1.5 rounded border border-[#ff9015]/30 flex items-center gap-2">
+                        <span>💡</span>
+                        <span>Pista: <strong>Caso Colchagua</strong> (o haz clic en <strong>[➜]</strong> directamente para entrar)</span>
                       </div>
                     )}
                   </form>
@@ -228,22 +239,23 @@ export default function WindowsXPScreen({ isZoomedIn = false, onZoomIn = () => {
           </div>
 
           {/* Barra inferior clásica con botón de apagado */}
-          <div className="h-14 bg-[#001584] border-t-[3px] border-[#d87c10] flex items-center justify-between px-6 shadow-inner text-xs">
+          <div className="h-16 bg-[#001584] border-t-[4px] border-[#d87c10] flex items-center justify-between px-10 shadow-inner text-sm shrink-0">
             <button
               onClick={() => {
                 playXPClick();
                 onClose();
               }}
-              className="flex items-center gap-2 px-3 py-1.5 rounded bg-transparent hover:bg-white/10 text-white cursor-pointer transition-colors"
+              className="flex items-center gap-3 px-4 py-2 rounded bg-black/20 hover:bg-white/15 text-white cursor-pointer transition-colors border border-white/20 shadow-sm"
+              title="Apagar o volver a la vista del despacho"
             >
               {/* Botón de apagado rojo cuadrado de XP */}
-              <div className="w-5 h-5 bg-[#dc3545] rounded-sm flex items-center justify-center border border-white/50 text-[10px] font-bold shadow">
+              <div className="w-7 h-7 bg-[#dc3545] rounded-sm flex items-center justify-center border border-white/60 text-xs font-black shadow">
                 ⏻
               </div>
-              <span className="font-semibold text-xs">Apagar o salir</span>
+              <span className="font-bold text-sm">Apagar equipo</span>
             </button>
 
-            <div className="text-blue-200/60 text-[11px] font-mono">
+            <div className="text-blue-200/70 text-xs font-mono">
               (C) 2013 Murkoff Psychiatric Systems. Todos los derechos reservados.
             </div>
           </div>

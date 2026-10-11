@@ -847,11 +847,11 @@ const Monitor = ({ onClick, isZooming, isScreenActive, onClose, onHover, onUnhov
         <Html
           transform
           position={[0, 0, 0]}
-          scale={0.003825}
+          scale={0.11953}
           wrapperClass="xp-screen-container"
         >
           <div
-            style={{ width: '800px', height: '492px' }}
+            style={{ width: '1024px', height: '629px' }}
             className="rounded-sm overflow-hidden select-none shadow-2xl"
           >
             <WindowsXPScreen
@@ -1278,14 +1278,12 @@ const CameraController = ({
     }
     else if (target === 'terminal') {
       currentYaw.current = THREE.MathUtils.lerp(currentYaw.current, 0, 0.1);
-      // Cámara centrada a distancia natural (~1.74 unidades) para que el monitor ocupe ~72% de la pantalla y el entorno 3D siga visible
-      const monPos = new THREE.Vector3(-1.75, 1.54, 0.72);
+      // Cámara centrada perpendicular a la pantalla para que el monitor ocupe ~75% de la vista con el entorno 3D visible
+      const monPos = new THREE.Vector3(-1.46, 1.52, 1.66);
       camera.position.lerp(monPos, 0.08);
 
-      const lookTarget = new THREE.Vector3(-2.0, 1.5, -1.0);
-      const currentLookAt = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion).add(camera.position);
-      currentLookAt.lerp(lookTarget, 0.1);
-      camera.lookAt(currentLookAt);
+      const lookTarget = new THREE.Vector3(-1.95, 1.52, -0.74);
+      camera.lookAt(lookTarget);
 
       if (camera.position.distanceTo(monPos) < 0.08) onReachedTarget('terminal');
     }
