@@ -99,4 +99,13 @@
   100% { opacity: 0; }
 }
 
+/* Cursor icónico de Outlast: flecha negra con contorno blanco nítido */
+html, body, div, button, a, [role="button"], input, select, textarea {
+  cursor: url('/assets/cursor_outlast.svg') 2 2, auto !important;
+}
+
+.outlast-cursor {
+  cursor: url('/assets/cursor_outlast.svg') 2 2, auto !important;
+}
+
 

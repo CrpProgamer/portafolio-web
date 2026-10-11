@@ -4,6 +4,7 @@ import { Box, Plane, Text, useCursor, RoundedBox, useGLTF, useTexture, Center, H
 import * as THREE from 'three';
 import InvestigationFiles from './InvestigationFiles.jsx';
 import OutlastCamcorderOverlay from './OutlastCamcorderOverlay.jsx';
+import OutlastDocumentOverlay from './OutlastDocumentOverlay.jsx';
 import WindowsXPScreen from './WindowsXPScreen.jsx';
 
 // ---- 3D Models & Enclosed Asylum Office ----
@@ -85,27 +86,74 @@ const AsylumExitSign = ({ position = [6.2, 1.95, -5.12] }) => {
 
 const BloodWallWritings = () => (
   <group>
-    {/* Mensaje central icónico en la pared del fondo sobre el escritorio (estilo Padre Martin / pacientes) */}
-    <group position={[-1.2, 3.8, -5.14]}>
+    {/* Mensaje principal sangriento en la pared frontal sobre los bloques de hormigón (Referencia Foto 1) */}
+    <group position={[-1.2, 3.2, -5.14]}>
+      {/* Palabra principal chorreante en sangre oscura */}
       <Text
         font="/assets/fonts/Nosifer.ttf"
-        fontSize={0.42}
-        color="#450505"
-        letterSpacing={0.06}
+        fontSize={0.68}
+        color="#540404"
+        letterSpacing={0.12}
         anchorX="center"
         anchorY="middle"
       >
-        EL WALRIDER NOS OBSERVA
+        OBSERVA
       </Text>
-      {/* Chorretones de sangre escurriendo por la pared como dedos arrastrados */}
-      {[-2.4, -1.8, -1.1, -0.4, 0.3, 0.9, 1.7, 2.2].map((x, i) => (
-        <Box key={i} args={[0.018 + (i % 3) * 0.008, 0.5 + (i % 4) * 0.28, 0.005]} position={[x, -0.42 - (i % 3) * 0.1, 0.005]}>
-          <meshStandardMaterial color="#320303" roughness={0.7} opacity={0.88} transparent />
+
+      {/* Segunda línea ensangrentada y tachada estilo paciente psiquiátrico (Foto 1) */}
+      <Text
+        position={[0, -0.72, 0]}
+        font="/assets/fonts/Creepster.ttf"
+        fontSize={0.44}
+        color="#480303"
+        letterSpacing={0.08}
+        anchorX="center"
+        anchorY="middle"
+      >
+        LA VERDAD
+      </Text>
+
+      {/* Inscripciones frenéticas repetidas en sangre alrededor de las letras principales (Foto 1) */}
+      {[
+        [-2.3, 0.65, 0.17, -0.06, 'OBSERVA'],
+        [2.1, 0.58, 0.16, 0.05, 'OBSERVA'],
+        [-2.6, -0.45, 0.15, 0.08, 'NO HAY SALIDA'],
+        [2.3, -0.52, 0.16, -0.07, 'CASO COLCHAGUA'],
+        [-1.8, 1.05, 0.14, 0.04, 'DATAMART'],
+        [1.6, 1.02, 0.15, -0.05, 'OBSERVAN'],
+        [-0.8, -1.25, 0.16, 0.02, 'OBSERVA'],
+        [1.1, -1.22, 0.15, -0.03, 'LA VERDAD'],
+        [-3.2, 0.15, 0.14, -0.09, 'TERAPIA'],
+        [3.0, 0.12, 0.14, 0.06, 'OBSERVA']
+      ].map(([x, y, size, rot, text], i) => (
+        <Text
+          key={i}
+          position={[x, y, 0.002]}
+          rotation={[0, 0, rot]}
+          font="/assets/fonts/RockSalt.ttf"
+          fontSize={size}
+          color="#380303"
+          letterSpacing={0.06}
+          anchorX="center"
+          anchorY="middle"
+        >
+          {text}
+        </Text>
+      ))}
+
+      {/* Chorretones verticales gruesos de sangre que bajan por las juntas del hormigón hacia el piso (Foto 1) */}
+      {[-2.2, -1.7, -1.2, -0.8, -0.2, 0.4, 0.9, 1.5, 2.1].map((x, i) => (
+        <Box
+          key={i}
+          args={[0.024 + (i % 3) * 0.012, 1.2 + (i % 4) * 0.45, 0.006]}
+          position={[x, -1.1 - (i % 3) * 0.25, 0.005]}
+        >
+          <meshStandardMaterial color="#2d0202" roughness={0.65} opacity={0.92} transparent />
         </Box>
       ))}
     </group>
 
-    {/* Mensaje en la pared lateral izquierda junto al conducto de ventilación */}
+    {/* Inscripciones en la pared lateral izquierda junto al conducto de ventilación */}
     <group position={[-9.43, 0.8, -2.8]} rotation={[0, Math.PI / 2, 0]}>
       <Text
         font="/assets/fonts/Nosifer.ttf"
@@ -126,7 +174,7 @@ const BloodWallWritings = () => (
         anchorX="center"
         anchorY="middle"
       >
-        PURIFICACION POR SANGRE
+        PURIFICACION POR DATOS
       </Text>
       {[-1.2, -0.6, 0.4, 1.0].map((x, i) => (
         <Box key={i} args={[0.02, 0.55 + (i % 3) * 0.2, 0.005]} position={[x, -0.35, 0.005]}>
@@ -145,7 +193,7 @@ const BloodWallWritings = () => (
         anchorX="center"
         anchorY="middle"
       >
-        MURKOFF MIENTE // TERAPIA MORFOGENICA
+        MURKOFF MIENTE // TERAPIA COGNITIVA
       </Text>
     </group>
   </group>
@@ -438,6 +486,37 @@ const CamcorderIRSpotlight = ({ active, zoom = 1.0 }) => {
   );
 };
 
+// Material PBR para los muros de bloques de hormigón del hospital psiquiátrico (Foto 1)
+const HospitalWallMaterial = ({ repeat = [5.5, 2.6], color = '#7c8b83' }) => {
+  const [diffuse, normal, roughness] = useTexture([
+    '/assets/textures/wall/concrete_block_wall_diff_1k.jpg',
+    '/assets/textures/wall/concrete_block_wall_nor_1k.jpg',
+    '/assets/textures/wall/concrete_block_wall_rough_1k.jpg'
+  ]);
+
+  useEffect(() => {
+    [diffuse, normal, roughness].forEach((tex) => {
+      if (tex) {
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(repeat[0], repeat[1]);
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.needsUpdate = true;
+      }
+    });
+  }, [diffuse, normal, roughness, repeat]);
+
+  return (
+    <meshStandardMaterial
+      map={diffuse}
+      normalMap={normal}
+      roughnessMap={roughness}
+      color={color}
+      roughness={0.92}
+      metalness={0.04}
+    />
+  );
+};
+
 const Room = ({ isCamcorderActive = false }) => (
   <group>
     {/* Suelo: Baldosas clínicas institucionales de hospital manchadas y desgastadas */}
@@ -454,35 +533,49 @@ const Room = ({ isCamcorderActive = false }) => (
     <FlickeringFluorescentFixture position={[0, 5.05, 0.8]} isCamcorderActive={isCamcorderActive} />
     <FlickeringFluorescentFixture position={[-4.5, 5.05, -1.8]} isCamcorderActive={isCamcorderActive} />
 
-    {/* Pared Frontal con suciedad acumulada */}
-    <Plane args={[20, 9.4]} position={[0, 0.6, -5.2]} receiveShadow>
-      <meshStandardMaterial color="#0f1512" roughness={0.9} />
-    </Plane>
-    {/* Zócalo pared frontal */}
+    {/* Paredes con textura PBR de bloques de hormigón y zócalo institucional (Referencia Foto 1) */}
+    <Suspense fallback={null}>
+      {/* Pared Frontal con división de bloques superiores y base más oscura */}
+      <group position={[0, 0.6, -5.2]}>
+        <Plane args={[20, 6.4]} position={[0, 1.5, 0]} receiveShadow>
+          <HospitalWallMaterial repeat={[5.5, 1.8]} color="#88968f" />
+        </Plane>
+        {/* Moldura divisoria de mortero / zócalo intermedio */}
+        <Box args={[20, 0.12, 0.05]} position={[0, -1.7, 0.02]} receiveShadow>
+          <meshStandardMaterial color="#2d332e" roughness={0.8} />
+        </Box>
+        {/* Sección inferior más oscura con pátina y humedad */}
+        <Plane args={[20, 2.8]} position={[0, -3.1, 0]} receiveShadow>
+          <HospitalWallMaterial repeat={[5.5, 0.8]} color="#48534c" />
+        </Plane>
+      </group>
+
+      {/* Pared Trasera */}
+      <Plane args={[20, 9.4]} rotation={[0, Math.PI, 0]} position={[0, 0.6, 7.5]} receiveShadow>
+        <HospitalWallMaterial repeat={[5.5, 2.6]} color="#7c8880" />
+      </Plane>
+
+      {/* Pared Izquierda */}
+      <Plane args={[14, 9.4]} rotation={[0, Math.PI / 2, 0]} position={[-9.5, 0.6, 1.2]} receiveShadow>
+        <HospitalWallMaterial repeat={[4.0, 2.6]} color="#808d86" />
+      </Plane>
+
+      {/* Pared Derecha */}
+      <Plane args={[14, 9.4]} rotation={[0, -Math.PI / 2, 0]} position={[9.5, 0.6, 1.2]} receiveShadow>
+        <HospitalWallMaterial repeat={[4.0, 2.6]} color="#808d86" />
+      </Plane>
+    </Suspense>
+
+    {/* Zócalo de suelo */}
     <Box args={[20, 0.35, 0.1]} position={[0, -3.85, -5.15]} receiveShadow>
       <meshStandardMaterial color="#070908" roughness={0.7} metalness={0.3} />
     </Box>
-
-    {/* Pared Trasera */}
-    <Plane args={[20, 9.4]} rotation={[0, Math.PI, 0]} position={[0, 0.6, 7.5]} receiveShadow>
-      <meshStandardMaterial color="#0c100e" roughness={0.92} />
-    </Plane>
     <Box args={[20, 0.35, 0.1]} position={[0, -3.85, 7.45]} receiveShadow>
       <meshStandardMaterial color="#070908" roughness={0.7} metalness={0.3} />
     </Box>
-
-    {/* Pared Izquierda */}
-    <Plane args={[14, 9.4]} rotation={[0, Math.PI / 2, 0]} position={[-9.5, 0.6, 1.2]} receiveShadow>
-      <meshStandardMaterial color="#0e1310" roughness={0.9} />
-    </Plane>
     <Box args={[0.1, 0.35, 14]} position={[-9.45, -3.85, 1.2]} receiveShadow>
       <meshStandardMaterial color="#070908" roughness={0.7} metalness={0.3} />
     </Box>
-
-    {/* Pared Derecha */}
-    <Plane args={[14, 9.4]} rotation={[0, -Math.PI / 2, 0]} position={[9.5, 0.6, 1.2]} receiveShadow>
-      <meshStandardMaterial color="#0e1310" roughness={0.9} />
-    </Plane>
     <Box args={[0.1, 0.35, 14]} position={[9.45, -3.85, 1.2]} receiveShadow>
       <meshStandardMaterial color="#070908" roughness={0.7} metalness={0.3} />
     </Box>
@@ -700,7 +793,7 @@ const Desk = () => {
   );
 };
 
-const Monitor = ({ onClick, isZooming, isScreenActive, onClose }) => {
+const Monitor = ({ onClick, isZooming, isScreenActive, onClose, onHover, onUnhover }) => {
   const [hovered, setHovered] = useState(false);
   useCursor(hovered && !isZooming && !isScreenActive);
 
@@ -709,8 +802,14 @@ const Monitor = ({ onClick, isZooming, isScreenActive, onClose }) => {
       position={[-2, 1.5, -1]}
       rotation={[0, 0.2, 0]}
       onClick={!isZooming && !isScreenActive ? onClick : null}
-      onPointerOver={() => setHovered(true)}
-      onPointerOut={() => setHovered(false)}
+      onPointerOver={() => {
+        setHovered(true);
+        if (onHover && !isZooming && !isScreenActive) onHover('terminal');
+      }}
+      onPointerOut={() => {
+        setHovered(false);
+        if (onUnhover) onUnhover();
+      }}
     >
       {/* Base pesada, cuello articulado y carcasa con profundidad */}
       <RoundedBox args={[1.72, 0.14, 1.08]} radius={0.05} smoothness={2} position={[0, -1.45, 0.04]} castShadow receiveShadow>
@@ -767,46 +866,122 @@ const Monitor = ({ onClick, isZooming, isScreenActive, onClose }) => {
   );
 };
 
-const DocumentFolder = ({ onClick, isZooming }) => {
+// Generador de textura de carpeta confidencial manila / gris con sello carmesí (Foto 4)
+const makeFolderTexture = () => {
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+
+  // Fondo cartón desgastado gris-beige (Foto 4)
+  ctx.fillStyle = '#68645a';
+  ctx.fillRect(0, 0, 512, 512);
+
+  // Fibras y grano de cartón desgastado
+  for (let i = 0; i < 4500; i += 1) {
+    const alpha = 0.03 + Math.random() * 0.08;
+    ctx.fillStyle = Math.random() > 0.5 ? `rgba(20, 18, 14, ${alpha})` : `rgba(230, 222, 205, ${alpha})`;
+    ctx.fillRect(Math.random() * 512, Math.random() * 512, 1 + Math.random() * 2, 1 + Math.random() * 2);
+  }
+
+  // Manchas de humedad y manipulación
+  for (let i = 0; i < 35; i += 1) {
+    const x = Math.random() * 512;
+    const y = Math.random() * 512;
+    const radius = 25 + Math.random() * 65;
+    const patch = ctx.createRadialGradient(x, y, 0, x, y, radius);
+    patch.addColorStop(0, 'rgba(15, 12, 8, 0.12)');
+    patch.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = patch;
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Sello estampado "CONFIDENTIAL" con doble marco en carmesí oscuro (Foto 4)
+  ctx.save();
+  ctx.translate(256, 256);
+  ctx.rotate(-0.025);
+
+  // Marco exterior
+  ctx.strokeStyle = '#5a1212';
+  ctx.lineWidth = 5.5;
+  ctx.strokeRect(-165, -52, 330, 104);
+
+  // Marco interior fino
+  ctx.lineWidth = 1.8;
+  ctx.strokeRect(-158, -45, 316, 90);
+
+  // Texto CONFIDENTIAL
+  ctx.font = 'bold 36px "Courier Prime", monospace';
+  ctx.fillStyle = '#5a1212';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.letterSpacing = '5px';
+  ctx.fillText('CONFIDENTIAL', 0, 0);
+
+  // Micro-desgastes en el sello de tinta
+  for (let i = 0; i < 160; i += 1) {
+    ctx.fillStyle = 'rgba(104, 100, 90, 0.5)';
+    ctx.fillRect(-170 + Math.random() * 340, -56 + Math.random() * 112, 2 + Math.random() * 3, 2 + Math.random() * 3);
+  }
+  ctx.restore();
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  return texture;
+};
+
+const DocumentFolder = ({ onClick, isZooming, onHover, onUnhover }) => {
   const [hovered, setHovered] = useState(false);
-  const paperTexture = useMemo(() => makeTexture('paper'), []);
+  const folderTexture = useMemo(() => makeFolderTexture(), []);
   useCursor(hovered && !isZooming);
-  useEffect(() => () => paperTexture.dispose(), [paperTexture]);
+  useEffect(() => () => folderTexture.dispose(), [folderTexture]);
 
   return (
-    <group position={[1.5, 0.02, 0.5]} rotation={[-Math.PI / 2, 0, -0.1]} onClick={!isZooming ? onClick : null} onPointerOver={() => setHovered(true)} onPointerOut={() => setHovered(false)}>
-      {/* Sombra de contacto */}
-      <Plane args={[1.6, 2.1]} position={[0, 0, -0.01]}>
-        <meshBasicMaterial color="#000" opacity={0.5} transparent />
+    <group
+      position={[1.65, 0.04, 0.65]}
+      rotation={[-Math.PI / 2, 0, -0.16]}
+      onClick={!isZooming ? onClick : null}
+      onPointerOver={() => {
+        setHovered(true);
+        if (onHover && !isZooming) onHover('document');
+      }}
+      onPointerOut={() => {
+        setHovered(false);
+        if (onUnhover) onUnhover();
+      }}
+    >
+      {/* Sombra de contacto suave en la madera */}
+      <Plane args={[1.5, 1.95]} position={[0, 0, -0.015]}>
+        <meshBasicMaterial color="#000" opacity={0.65} transparent />
       </Plane>
-      {/* Cantos de hojas irregulares y cubierta azul de expediente */}
-      <Box args={[1.32, 1.76, 0.08]} position={[0, 0, 0.035]} castShadow receiveShadow>
-        <meshStandardMaterial color="#21355b" roughness={0.84} />
+
+      {/* Contraportada de cartulina */}
+      <Box args={[1.32, 1.82, 0.015]} position={[0, 0, 0.008]} castShadow receiveShadow>
+        <meshStandardMaterial color="#555249" roughness={0.88} />
       </Box>
-      <Plane args={[1.21, 1.64]} position={[-0.03, 0, 0.086]} receiveShadow>
-        <meshStandardMaterial color="#3d5da2" roughness={0.76} />
-      </Plane>
-      <Plane args={[1.14, 1.52]} position={[0.08, 0.03, 0.092]} receiveShadow>
-        <meshStandardMaterial map={paperTexture} color="#c7b99b" roughness={0.98} />
-      </Plane>
-      <Plane args={[1.2, 1.63]} position={[-0.08, 0, 0.101]} receiveShadow castShadow>
-        <meshStandardMaterial color="#476ebc" roughness={0.75} />
-      </Plane>
-      <Box args={[0.6, 0.14, 0.014]} position={[0, 0, 0.112]}>
-        <meshStandardMaterial color="#b8a57d" roughness={0.7} metalness={0.15} />
+
+      {/* Hojas interiores de papel blanco marfil visibles en los bordes (Foto 4) */}
+      <Box args={[1.28, 1.78, 0.03]} position={[0.015, -0.01, 0.024]} receiveShadow>
+        <meshStandardMaterial color="#ddd7cb" roughness={0.92} />
       </Box>
-      {hovered && !isZooming && (
-        <Text position={[0, -1.2, 0.2]} rotation={[Math.PI / 2, 0.1, 0]} fontSize={0.15} color="#fff">
-          [Clic] Leer Expediente
-        </Text>
-      )}
+
+      {/* Portada del expediente con el sello CONFIDENTIAL estampado */}
+      <Plane args={[1.32, 1.82]} position={[0, 0, 0.042]} receiveShadow castShadow>
+        <meshStandardMaterial map={folderTexture} roughness={0.85} />
+      </Plane>
+
+      {/* Lomo / solapa izquierda reforzada */}
+      <Box args={[0.08, 1.83, 0.044]} position={[-0.65, 0, 0.024]} castShadow>
+        <meshStandardMaterial color="#423f37" roughness={0.9} />
+      </Box>
     </group>
   );
 };
 
 
 
-const InteractiveCamera = ({ onClick, isZooming, isActive }) => {
+const InteractiveCamera = ({ onClick, isZooming, isActive, onHover, onUnhover }) => {
   const [hovered, setHovered] = useState(false);
   const { scene } = useGLTF('/assets/models/low_poly_outlast_camera.glb');
   const cameraModel = useMemo(() => scene.clone(true), [scene]);
@@ -868,8 +1043,12 @@ const InteractiveCamera = ({ onClick, isZooming, isActive }) => {
       onPointerOver={(e) => {
         e.stopPropagation();
         setHovered(true);
+        if (onHover && !isZooming) onHover('camcorder');
       }}
-      onPointerOut={() => setHovered(false)}
+      onPointerOut={() => {
+        setHovered(false);
+        if (onUnhover) onUnhover();
+      }}
     >
       <Center>
         <group>
@@ -1116,46 +1295,11 @@ const CameraController = ({
 };
 
 
-// ---- 2D Overlays ----
-const DocumentOverlay = ({ onClose }) => (
-  <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-700">
-    <div className="classified-paper relative w-full max-w-2xl text-[#1a1a1a] p-8 md:p-12 shadow-[0_0_100px_rgba(0,0,0,1)] overflow-y-auto max-h-[90vh] font-typewriter rounded-sm border-l-8 border-[#3b5998]">
-
-      <div className="absolute top-4 right-4 border-4 border-[#600000] text-[#600000] px-3 py-1 font-bold text-2xl rotate-[12deg] opacity-80 mix-blend-multiply">
-        CLASIFICADO
-      </div>
-
-      <div className="border-b-2 border-black/30 pb-4 mb-6">
-        <p className="mb-1 text-sm text-black/60">FECHA: 17 de septiembre de 2013</p>
-        <p className="mb-1"><strong>De:</strong> 10260110756@mutemail.com</p>
-        <p className="mb-1"><strong>Para:</strong> División de Análisis de Datos</p>
-        <p><strong>Asunto:</strong> CONSEJO / Actividad ilegal en Sistemas Psiquiátricos Murkoff</p>
-      </div>
-
-      <p className="mb-4">Sé que no me conoce, pero debo hacer esto rápido. Podrían estar vigilándome.</p>
-
-      <p className="mb-4">Trabajé durante dos semanas en las instalaciones de Sistemas psiquiátricos Murkoff, en el monte Massive, como consultor de software. Me temo que estoy quebrantando un montón de acuerdos de confidencialidad, pero que les jodan.</p>
-
-      <p className="mb-4">El sujeto <span className="font-bold underline text-black">Cristobal A. Rojas Perez</span> ha trabajado intensamente en el <span className="font-bold">Caso Colchagua</span>. Demuestra capacidades anómalas para procesar terabytes de información y encontrar correlaciones donde los analistas normales solo ven ruido.</p>
-
-      <p className="mb-4">Están ocurriendo cosas terribles. No lo entiendo. Soy incapaz de creer la mitad de las cosas que vi. Murkoff está ganando dinero a costa de hacer daño a muchas personas, y si el sujeto Rojas desencripta los notebooks y accede al Datamart, encontrará las vulnerabilidades reales de las PYMEs.</p>
-
-      <p className="mb-8 mt-8 font-bold text-lg">La verdad tiene que salir a la luz.</p>
-
-      <div className="flex justify-center mt-12">
-        <button onClick={onClose} className="px-8 py-2 bg-[#1a1a1a] text-[#d4cbb3] border-2 border-[#1a1a1a] rounded-sm font-bold uppercase hover:bg-[#600000] hover:border-[#600000] transition-all cursor-pointer">
-          Cerrar Documento
-        </button>
-      </div>
-    </div>
-  </div>
-);
-
-
 // ---- Main Scene Component ----
 export default function DesktopScene() {
   const [animatingTo, setAnimatingTo] = useState('none');
   const [activeOverlay, setActiveOverlay] = useState('none');
+  const [hoveredItem, setHoveredItem] = useState(null); // 'terminal' | 'document' | 'camcorder' | null
   const [isCamcorderActive, setIsCamcorderActive] = useState(false);
   const [isCameraOnDesk, setIsCameraOnDesk] = useState(true);
   const [isCameraTransitioning, setIsCameraTransitioning] = useState(false);
@@ -1321,7 +1465,7 @@ export default function DesktopScene() {
   }, [activeOverlay, animatingTo, isCamcorderActive]);
 
   return (
-    <div className="w-screen h-screen relative bg-black overflow-hidden cursor-crosshair">
+    <div className="w-screen h-screen relative bg-black overflow-hidden outlast-cursor">
       <div className="w-full h-full">
         <Canvas camera={{ position: [0, 3.5, 4], fov: 60 }}>
           <color attach="background" args={['#020403']} />
@@ -1350,14 +1494,23 @@ export default function DesktopScene() {
               isZooming={animatingTo !== 'none'}
               isScreenActive={animatingTo === 'terminal' || activeOverlay === 'terminal'}
               onClose={handleClose}
+              onHover={setHoveredItem}
+              onUnhover={() => setHoveredItem(null)}
             />
-            <DocumentFolder onClick={() => handleOpen('document')} isZooming={animatingTo !== 'none'} />
+            <DocumentFolder
+              onClick={() => handleOpen('document')}
+              isZooming={animatingTo !== 'none'}
+              onHover={setHoveredItem}
+              onUnhover={() => setHoveredItem(null)}
+            />
             {/* La cámara desaparece al agarrarla y solo reaparece en la mesa cuando la pantalla está completamente en negro */}
             {isCameraOnDesk && (
               <InteractiveCamera
                 onClick={handleToggleCamcorder}
                 isZooming={animatingTo !== 'none'}
                 isActive={isCamcorderActive}
+                onHover={setHoveredItem}
+                onUnhover={() => setHoveredItem(null)}
               />
             )}
             <Clutter />
@@ -1426,6 +1579,26 @@ export default function DesktopScene() {
         isDocumentOrTerminalOpen={activeOverlay !== 'none' || animatingTo === 'terminal'}
       />
 
+      {/* In-Game HUD Interaction Prompt (Foto 4: "Pulsa (BOTÓN IZQUIERDO DEL RATÓN) para coger Documento", etc.) */}
+      {hoveredItem && animatingTo === 'none' && activeOverlay === 'none' && (
+        <div className="fixed bottom-10 left-0 right-0 z-30 flex justify-center pointer-events-none select-none animate-in fade-in duration-200">
+          <div className="bg-black/75 border border-white/20 text-[#eaeaea] px-6 py-2 rounded-xs font-typewriter text-xs sm:text-sm tracking-wider shadow-[0_4px_30px_rgba(0,0,0,0.95)] backdrop-blur-sm flex items-center gap-2">
+            <span>Pulsa</span>
+            <span className="text-white font-bold drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]">
+              (BOTÓN IZQUIERDO DEL RATÓN)
+            </span>
+            <span>
+              para{' '}
+              {hoveredItem === 'document'
+                ? 'coger Documento'
+                : hoveredItem === 'camcorder'
+                ? 'coger Videocámara'
+                : 'usar Terminal'}
+            </span>
+          </div>
+        </div>
+      )}
+
       {/* Botón flotante para alejarse del monitor y volver a la vista del escritorio */}
       {(animatingTo === 'terminal' || activeOverlay === 'terminal') && (
         <div className="fixed top-5 right-5 z-40 animate-in fade-in duration-300 pointer-events-auto">
@@ -1441,7 +1614,7 @@ export default function DesktopScene() {
       )}
 
       {/* Overlays */}
-      {activeOverlay === 'document' && <DocumentOverlay onClose={handleClose} />}
+      {activeOverlay === 'document' && <OutlastDocumentOverlay onClose={handleClose} />}
     </div>
   );
 }

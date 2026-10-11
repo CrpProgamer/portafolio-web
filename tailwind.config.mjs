@@ -14,7 +14,8 @@ export default {
         }
       },
       fontFamily: {
-        typewriter: ['"Courier New"', 'Courier', 'monospace'],
+        typewriter: ['"Courier Prime"', '"Courier New"', 'Courier', 'monospace'],
+        handwriting: ['"Caveat"', 'cursive'],
         sans: ['"Inter"', 'sans-serif']
       },
       animation: {
