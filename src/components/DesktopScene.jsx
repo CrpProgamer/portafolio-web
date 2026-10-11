@@ -1311,21 +1311,10 @@ export default function DesktopScene() {
 
   const playTurnSound = () => {
     try {
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContext) return;
-      const ctx = new AudioContext();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(115, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(45, ctx.currentTime + 0.18);
-      gain.gain.setValueAtTime(0.08, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.22);
-    } catch (err) { }
+      const audio = new Audio('/assets/sounds/camera_turn.wav');
+      audio.volume = 0.5;
+      audio.play().catch(() => {});
+    } catch (err) {}
   };
 
   const handleTurn = (direction) => {

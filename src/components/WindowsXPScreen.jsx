@@ -1,53 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
 import InvestigationFiles from './InvestigationFiles.jsx';
 
-// Sonidos sintéticos nostálgicos de Windows XP generados con Web Audio API
+// Reproducción de efectos de sonido Windows XP mediante archivos .wav
 const playXPChime = () => {
   try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return;
-    const ctx = new AudioContext();
-
-    // Acorde icónico de inicio de Windows XP: Eb3 -> Bb3 -> Eb4 -> G4 -> Bb4 -> Eb5
-    const notes = [155.56, 233.08, 311.13, 392.00, 466.16, 622.25];
-    const times = [0.0, 0.12, 0.24, 0.42, 0.65, 0.95];
-
-    notes.forEach((freq, i) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(freq, ctx.currentTime + times[i]);
-
-      gain.gain.setValueAtTime(0, ctx.currentTime + times[i]);
-      gain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + times[i] + 0.08);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + times[i] + 1.8);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start(ctx.currentTime + times[i]);
-      osc.stop(ctx.currentTime + times[i] + 2.0);
-    });
-  } catch (err) { }
+    const audio = new Audio('/assets/sounds/xp_startup.wav');
+    audio.volume = 0.8;
+    audio.play().catch(() => {});
+  } catch (err) {}
 };
 
 const playXPClick = () => {
   try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return;
-    const ctx = new AudioContext();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(800, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(400, ctx.currentTime + 0.04);
-    gain.gain.setValueAtTime(0.06, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.06);
-  } catch (err) { }
+    const audio = new Audio('/assets/sounds/xp_click.wav');
+    audio.volume = 0.6;
+    audio.play().catch(() => {});
+  } catch (err) {}
 };
 
 export default function WindowsXPScreen({ isZoomedIn = false, onZoomIn = () => { }, onClose = () => { } }) {

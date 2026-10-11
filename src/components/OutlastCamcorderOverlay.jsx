@@ -1,62 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-// Generador de efectos de sonido sintetizados nativos
+// Reproducción de efectos de sonido de la cámara mediante archivos .wav
 export const playCamcorderSound = (type) => {
   try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return;
-    const ctx = new AudioContext();
-
-    if (type === 'nightvision_on') {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(160, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(920, ctx.currentTime + 0.2);
-      gain.gain.setValueAtTime(0.14, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.38);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.38);
-    } else if (type === 'nightvision_off') {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(420, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.16);
-      gain.gain.setValueAtTime(0.16, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.22);
-    } else if (type === 'reload_battery') {
-      [0, 0.12].forEach((delay, i) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(i === 0 ? 320 : 640, ctx.currentTime + delay);
-        gain.gain.setValueAtTime(0.2, ctx.currentTime + delay);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.08);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(ctx.currentTime + delay);
-        osc.stop(ctx.currentTime + delay + 0.09);
-      });
-    } else if (type === 'low_battery_beep') {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'square';
-      osc.frequency.setValueAtTime(1040, ctx.currentTime);
-      gain.gain.setValueAtTime(0.08, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.14);
+    const soundMap = {
+      nightvision_on: '/assets/sounds/nightvision_on.wav',
+      nightvision_off: '/assets/sounds/nightvision_off.wav',
+      reload_battery: '/assets/sounds/battery_reload.wav',
+      low_battery_beep: '/assets/sounds/low_battery.wav',
+    };
+    const src = soundMap[type];
+    if (src) {
+      const audio = new Audio(src);
+      audio.volume = 0.7;
+      audio.play().catch(() => {});
     }
-  } catch (err) { }
+  } catch (err) {}
 };
 
 export default function OutlastCamcorderOverlay({
