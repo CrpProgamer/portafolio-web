@@ -142,20 +142,23 @@ export default function OutlastCamcorderOverlay({
           Tubo óptico auténtico, viñeteado cinematográfico y grano analógico
           ========================================================================= */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* 1. Máscara de tubo de lente ovalada de Outlast con viñeteado periférico */}
+        {/* 1. Máscara de tubo de lente óptico de Outlast: Viñeta profunda con esquinas completamente oscurecidas */}
         <div
-          className="absolute inset-0"
+          className="absolute inset-0 pointer-events-none"
           style={{
             background: `
               radial-gradient(
-                ellipse 76% 68% at 50% 50%,
+                ellipse 54% 48% at 50% 50%,
                 rgba(0, 0, 0, 0) 0%,
-                rgba(0, 0, 0, 0) 52%,
-                rgba(0, 15, 6, 0.40) 74%,
-                rgba(0, 7, 3, 0.82) 88%,
-                rgba(0, 0, 0, 0.96) 100%
+                rgba(0, 0, 0, 0) 24%,
+                rgba(0, 10, 4, 0.35) 45%,
+                rgba(0, 5, 2, 0.75) 65%,
+                rgba(0, 0, 0, 0.94) 82%,
+                rgba(0, 0, 0, 0.99) 92%,
+                #000000 100%
               )
             `,
+            boxShadow: 'inset 0 0 160px 45px #000000, inset 0 0 320px 90px rgba(0, 0, 0, 0.96)',
           }}
         />
 
@@ -163,7 +166,7 @@ export default function OutlastCamcorderOverlay({
         <div
           className="absolute inset-0 mix-blend-overlay outlast-grain-animation pointer-events-none"
           style={{
-            opacity: 0.18,
+            opacity: 0.70,
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
             backgroundRepeat: 'repeat',
             backgroundSize: '160px 160px',
