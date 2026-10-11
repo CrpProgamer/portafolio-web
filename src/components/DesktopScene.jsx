@@ -209,8 +209,13 @@ const FlickeringFluorescentFixture = ({ position = [0, 5.05, 0.8], isCamcorderAc
 
   useFrame(({ clock }) => {
     if (isCamcorderActive) {
-      if (lightRef.current) lightRef.current.intensity = 0;
-      if (tubeMatRef.current) tubeMatRef.current.emissiveIntensity = 0.05;
+      if (lightRef.current) {
+        lightRef.current.intensity = 260;
+        lightRef.current.color = new THREE.Color('#78ff9d');
+      }
+      if (tubeMatRef.current) {
+        tubeMatRef.current.emissiveIntensity = 2.4;
+      }
       return;
     }
 
@@ -223,6 +228,7 @@ const FlickeringFluorescentFixture = ({ position = [0, 5.05, 0.8], isCamcorderAc
     const factor = Math.max(0.08, (1 + hum) * dip * spark);
 
     if (lightRef.current) {
+      lightRef.current.color = new THREE.Color('#8da57a');
       lightRef.current.intensity = THREE.MathUtils.lerp(lightRef.current.intensity, 420 * factor, 0.22);
     }
     if (tubeMatRef.current) {
@@ -411,80 +417,66 @@ const AnatomicalSkeleton = () => {
   );
 };
 
-// Linterna Infrarroja (IR Spotlight) fijada directamente al visor óptico de la cámara (cero desfase de trackeo)
+// Linterna Infrarroja (IR Spotlight) fijada directamente al visor óptico de la cámara
 const CamcorderIRSpotlight = ({ active, zoom = 1.0 }) => {
-  const lightRef = useRef();
+  const spotRef = useRef();
   const fillLightRef = useRef();
+  const targetRef = useRef();
   const { camera, scene } = useThree();
 
-  // Target persistente rígidamente fijado en el eje óptico local de la cámara (hacia donde apunta la cruz)
-  const targetObject = useMemo(() => {
-    const obj = new THREE.Object3D();
-    obj.name = 'CamcorderIRTarget';
-    obj.position.set(0, 0, -22);
-    return obj;
-  }, []);
-
   useEffect(() => {
-    if (!camera.parent) scene.add(camera);
-    camera.add(targetObject);
-
-    const spot = lightRef.current;
-    if (spot) {
-      camera.add(spot);
-      spot.target = targetObject;
-      spot.position.set(0, 0, 0);
-    }
-
-    const fill = fillLightRef.current;
-    if (fill) {
-      camera.add(fill);
-      fill.position.set(0, 0, 0);
-    }
+    const targetObj = new THREE.Object3D();
+    targetObj.name = 'IRSpotTarget';
+    scene.add(targetObj);
+    targetRef.current = targetObj;
 
     return () => {
-      camera.remove(targetObject);
-      if (spot) camera.remove(spot);
-      if (fill) camera.remove(fill);
+      scene.remove(targetObj);
     };
-  }, [camera, scene, targetObject]);
-
-  // Ajustar el ángulo del cono de luz según el nivel de zoom para concentrar el haz
-  const beamAngle = Math.max(0.28, 0.58 / zoom);
+  }, [scene]);
 
   useFrame(() => {
-    const spot = lightRef.current;
-    if (spot) {
-      spot.position.set(0, 0, 0);
-      targetObject.position.set(0, 0, -22);
-      spot.target = targetObject;
-      spot.intensity = active ? 740 : 0;
+    if (!active) {
+      if (spotRef.current) spotRef.current.intensity = 0;
+      if (fillLightRef.current) fillLightRef.current.intensity = 0;
+      return;
     }
+
+    if (spotRef.current && targetRef.current) {
+      spotRef.current.position.copy(camera.position);
+
+      const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+      targetRef.current.position.copy(camera.position).add(forward.multiplyScalar(20));
+      targetRef.current.updateMatrixWorld();
+
+      spotRef.current.target = targetRef.current;
+      spotRef.current.intensity = 1100 * Math.min(1.8, zoom);
+    }
+
     if (fillLightRef.current) {
-      fillLightRef.current.position.set(0, 0, 0);
-      fillLightRef.current.intensity = active ? 1.6 : 0;
+      fillLightRef.current.position.copy(camera.position);
+      fillLightRef.current.intensity = 35;
     }
   });
 
   return (
     <>
-      {/* Foco de infrarrojos que ilumina con alto contraste exactamente al centro de la cruz de la cámara */}
       <spotLight
-        ref={lightRef}
-        intensity={active ? 740 : 0}
-        distance={32}
-        angle={beamAngle}
-        penumbra={0.72}
-        color="#72fca0"
-        decay={1.65}
+        ref={spotRef}
+        intensity={0}
+        distance={35}
+        angle={1.05}
+        penumbra={0.65}
+        color="#92ffa8"
+        decay={1.1}
         castShadow={false}
       />
-      {/* Luz ambiente local en la cámara para bañar sutilmente el entorno cercano */}
       <pointLight
         ref={fillLightRef}
-        intensity={active ? 1.6 : 0}
-        distance={3.8}
-        color="#2b7548"
+        intensity={0}
+        distance={22}
+        color="#32a85e"
+        decay={1.05}
       />
     </>
   );
@@ -1482,17 +1474,28 @@ export default function DesktopScene() {
           <color attach="background" args={['#020403']} />
           <fog attach="fog" args={['#020403', 2.5, isCamcorderActive ? 18 : 13]} />
 
-          {/* En visión nocturna, las luces ambientales se reducen al mínimo para el contraste terrorífico de Outlast */}
-          <ambientLight intensity={isCamcorderActive ? 0.015 : 0.08} color="#16221a" />
-          <hemisphereLight args={['#29362c', '#080c09', isCamcorderActive ? 0.02 : 0.22]} />
+          {/* Iluminación base adaptada: En visión nocturna el ambiente se tiñe de fósforo verde */}
+          <ambientLight
+            intensity={isCamcorderActive ? 0.45 : 0.08}
+            color={isCamcorderActive ? "#236339" : "#16221a"}
+          />
+          <hemisphereLight
+            args={isCamcorderActive ? ['#42a862', '#10331b', 0.65] : ['#29362c', '#080c09', 0.22]}
+          />
 
-          {/* Rebote frío y sucio estilo hospital psiquiátrico Mount Massive en modo normal */}
-          {!isCamcorderActive && (
-            <>
-              <pointLight position={[-5, 1.5, -1]} intensity={11} distance={6.5} color="#1c3629" />
-              <pointLight position={[-3.8, 1.15, 0.7]} intensity={5} distance={4.5} color="#1d3628" />
-            </>
-          )}
+          {/* Rebote ambiental de hospital psiquiátrico */}
+          <pointLight
+            position={[-5, 1.5, -1]}
+            intensity={isCamcorderActive ? 8 : 11}
+            distance={6.5}
+            color={isCamcorderActive ? "#297a48" : "#1c3629"}
+          />
+          <pointLight
+            position={[-3.8, 1.15, 0.7]}
+            intensity={isCamcorderActive ? 5 : 5}
+            distance={4.5}
+            color={isCamcorderActive ? "#247040" : "#1d3628"}
+          />
 
           {/* Linterna Infrarroja (IR Spotlight) que ilumina hacia donde mira el jugador con zoom dinámico */}
           <CamcorderIRSpotlight active={isCamcorderActive} zoom={zoomLevel} />

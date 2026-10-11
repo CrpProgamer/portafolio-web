@@ -149,24 +149,23 @@ export default function OutlastCamcorderOverlay({
           style={{
             background: `
               radial-gradient(
-                ellipse 68% 60% at 50% 50%,
+                ellipse 78% 70% at 50% 50%,
                 rgba(0, 0, 0, 0) 0%,
-                rgba(0, 0, 0, 0) 36%,
-                rgba(0, 10, 4, 0.45) 56%,
-                rgba(0, 5, 2, 0.88) 72%,
-                #000000 84%,
-                #000000 100%
+                rgba(0, 0, 0, 0) 58%,
+                rgba(0, 10, 4, 0.35) 76%,
+                rgba(0, 5, 2, 0.72) 90%,
+                rgba(0, 0, 0, 0.92) 100%
               )
             `,
           }}
         />
 
-        {/* 2. Color Grading de Fósforo P43 / IR (Alto contraste, negros profundos, sin brillo lechoso) */}
+        {/* 2. Color Grading de Fósforo P43 / IR con amplificación de luz nocturna */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            backdropFilter: 'contrast(1.6) brightness(0.92) saturate(0.35) hue-rotate(65deg)',
-            WebkitBackdropFilter: 'contrast(1.6) brightness(0.92) saturate(0.35) hue-rotate(65deg)',
+            backdropFilter: 'contrast(1.28) brightness(1.18) saturate(0.55) hue-rotate(65deg)',
+            WebkitBackdropFilter: 'contrast(1.28) brightness(1.18) saturate(0.55) hue-rotate(65deg)',
           }}
         />
 
