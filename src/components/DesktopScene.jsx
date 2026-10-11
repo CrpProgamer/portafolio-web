@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import InvestigationFiles from './InvestigationFiles.jsx';
 import OutlastCamcorderOverlay from './OutlastCamcorderOverlay.jsx';
 import OutlastDocumentOverlay from './OutlastDocumentOverlay.jsx';
+import OutlastMainMenu from './OutlastMainMenu.jsx';
 import WindowsXPScreen from './WindowsXPScreen.jsx';
 
 // ---- 3D Models & Enclosed Asylum Office ----
@@ -1298,6 +1299,7 @@ const CameraController = ({
 
 // ---- Main Scene Component ----
 export default function DesktopScene() {
+  const [isInMainMenu, setIsInMainMenu] = useState(true);
   const [animatingTo, setAnimatingTo] = useState('none');
   const [activeOverlay, setActiveOverlay] = useState('none');
   const [hoveredItem, setHoveredItem] = useState(null); // 'terminal' | 'document' | 'camcorder' | null
@@ -1436,12 +1438,15 @@ export default function DesktopScene() {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
       if (e.key === 'Escape') {
+        if (isInMainMenu) return;
         if (activeOverlay !== 'none' || animatingTo === 'terminal') {
           handleClose();
         } else if (isCamcorderActive) {
           handleToggleCamcorder();
+        } else {
+          setIsInMainMenu(true);
         }
-      } else if (activeOverlay === 'none' && animatingTo !== 'terminal') {
+      } else if (activeOverlay === 'none' && animatingTo !== 'terminal' && !isInMainMenu) {
         // Atajos de teclado para girar 90° libremente
         if (e.key === 'ArrowRight' || e.key === 'e' || e.key === 'E') {
           handleTurn('right');
@@ -1603,8 +1608,33 @@ export default function DesktopScene() {
         </div>
       )}
 
+      {/* Botón discreto en la esquina superior izquierda para regresar al Menú Principal */}
+      {!isInMainMenu && activeOverlay === 'none' && animatingTo === 'none' && !isCamcorderActive && (
+        <div className="fixed top-5 left-5 z-40 animate-in fade-in duration-300 pointer-events-auto">
+          <button
+            onClick={() => setIsInMainMenu(true)}
+            className="bg-black/80 hover:bg-white/15 text-white/70 hover:text-white border border-white/20 px-3.5 py-1.5 rounded-sm font-typewriter text-xs tracking-widest uppercase flex items-center gap-2 cursor-pointer transition-all duration-200 backdrop-blur-sm shadow-lg"
+            title="Abrir Menú Principal (o pulsa ESC)"
+          >
+            <span className="text-sm font-bold">◀</span>
+            <span>MENÚ PRINCIPAL</span>
+          </button>
+        </div>
+      )}
+
       {/* Overlays */}
       {activeOverlay === 'document' && <OutlastDocumentOverlay onClose={handleClose} />}
+
+      {/* Menú de Inicio Auténtico de Outlast */}
+      {isInMainMenu && (
+        <OutlastMainMenu
+          onStartGame={() => setIsInMainMenu(false)}
+          onResetGame={() => {
+            handleClose();
+            setIsInMainMenu(false);
+          }}
+        />
+      )}
     </div>
   );
 }
