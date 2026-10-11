@@ -236,14 +236,27 @@ export default function WindowsXPScreen({ isZoomedIn = false, onZoomIn = () => {
                   </div>
 
                   {/* Formulario de Login */}
-                  <form onSubmit={handleLogin} className="space-y-3 mt-3" onClick={(e) => e.stopPropagation()}>
+                  <form
+                    onSubmit={handleLogin}
+                    className="space-y-3 mt-3"
+                    onClick={(e) => e.stopPropagation()}
+                    autoComplete="off"
+                    data-lpignore="true"
+                  >
                     <div>
                       <label className="block text-xs text-blue-100 font-medium mb-1">Nombre de usuario:</label>
                       <input
                         type="text"
+                        name="murkoff_user_token"
+                        id="murkoff_user_token"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         onKeyDown={(e) => playKeySound(e.key)}
+                        autoComplete="off"
+                        autoCorrect="off"
+                        autoCapitalize="off"
+                        spellCheck="false"
+                        data-lpignore="true"
                         className="w-full px-3 py-1.5 bg-white text-black font-sans text-sm rounded-xs border-2 border-blue-400 focus:outline-none focus:ring-2 focus:ring-[#ff9015] shadow-inner font-medium"
                         placeholder="Nombre de usuario"
                       />
@@ -253,10 +266,24 @@ export default function WindowsXPScreen({ isZoomedIn = false, onZoomIn = () => {
                       <label className="block text-xs text-blue-100 font-medium mb-1">Escriba su contraseña:</label>
                       <div className="flex items-center gap-2">
                         <input
-                          type="password"
+                          type="text"
+                          name="murkoff_auth_key"
+                          id="murkoff_auth_key"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           onKeyDown={(e) => playKeySound(e.key)}
+                          autoComplete="off"
+                          autoCorrect="off"
+                          autoCapitalize="off"
+                          spellCheck="false"
+                          data-lpignore="true"
+                          data-1p-ignore="true"
+                          data-form-type="other"
+                          style={{
+                            WebkitTextSecurity: 'disc',
+                            MozTextSecurity: 'disc',
+                            textSecurity: 'disc',
+                          }}
                           className="flex-1 px-3 py-1.5 bg-white text-black font-sans text-sm rounded-xs border-2 border-blue-400 focus:outline-none focus:ring-2 focus:ring-[#ff9015] shadow-inner tracking-widest font-bold"
                           placeholder="••••••••"
                           autoFocus={isZoomedIn}
