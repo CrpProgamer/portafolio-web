@@ -1,55 +1,56 @@
 import { Suspense, useState, useEffect, useMemo, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Box, Plane, Text, useCursor, RoundedBox, useGLTF, useTexture, Center } from '@react-three/drei';
+import { Box, Plane, Text, useCursor, RoundedBox, useGLTF, useTexture, Center, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import InvestigationFiles from './InvestigationFiles.jsx';
 import OutlastCamcorderOverlay from './OutlastCamcorderOverlay.jsx';
+import WindowsXPScreen from './WindowsXPScreen.jsx';
 
 // ---- 3D Models & Enclosed Asylum Office ----
 const AsylumDoor = () => (
-  <group position={[6.2, -0.7, -5.14]}>
-    {/* Marco metálico de la puerta */}
-    <Box args={[2.6, 4.8, 0.22]} position={[0, 0, 0]} castShadow receiveShadow>
+  <group position={[6.2, -0.8, -5.14]}>
+    {/* Marco metálico de la puerta pesada de manicomio asentado sobre el suelo */}
+    <Box args={[3.0, 6.4, 0.24]} position={[0, 0, 0]} castShadow receiveShadow>
       <meshStandardMaterial color="#141816" roughness={0.7} metalness={0.6} />
     </Box>
-    {/* Hoja de la puerta de madera maciza hospitalaria */}
-    <Box args={[2.24, 4.48, 0.12]} position={[0, -0.05, 0.05]} castShadow receiveShadow>
+    {/* Hoja de la puerta de madera maciza hospitalaria (desde el suelo y = -4 hasta y = 2.4) */}
+    <Box args={[2.68, 6.08, 0.14]} position={[0, -0.05, 0.05]} castShadow receiveShadow>
       <meshStandardMaterial color="#2c221a" roughness={0.85} metalness={0.1} />
     </Box>
-    {/* Plancha de protección de acero en la parte inferior */}
-    <Box args={[2.2, 0.8, 0.14]} position={[0, -1.8, 0.06]} castShadow receiveShadow>
+    {/* Plancha de protección de acero en la parte inferior descansando directamente en el suelo */}
+    <Box args={[2.64, 1.4, 0.16]} position={[0, -2.35, 0.06]} castShadow receiveShadow>
       <meshStandardMaterial color="#3a3d3a" roughness={0.5} metalness={0.8} />
     </Box>
-    {/* Ventana de observación rectangular con barras */}
-    <group position={[0, 0.9, 0.06]}>
-      <Box args={[0.7, 1.1, 0.14]}>
+    {/* Ventana de observación rectangular con barras situada a la altura de los ojos */}
+    <group position={[0, 0.85, 0.06]}>
+      <Box args={[0.8, 1.3, 0.16]}>
         <meshStandardMaterial color="#0b0e0c" roughness={0.4} />
       </Box>
       {/* Cristal reforzado esmerilado */}
-      <Plane args={[0.54, 0.94]} position={[0, 0, 0.08]}>
+      <Plane args={[0.64, 1.14]} position={[0, 0, 0.09]}>
         <meshStandardMaterial color="#2d4251" roughness={0.3} metalness={0.4} transparent opacity={0.85} />
       </Plane>
       {/* Barrotes de seguridad */}
-      {[-0.15, 0, 0.15].map((x, i) => (
-        <Box key={i} args={[0.025, 0.94, 0.03]} position={[x, 0, 0.1]}>
+      {[-0.2, 0, 0.2].map((x, i) => (
+        <Box key={i} args={[0.03, 1.14, 0.03]} position={[x, 0, 0.11]}>
           <meshStandardMaterial color="#1a1a1a" metalness={0.85} roughness={0.3} />
         </Box>
       ))}
     </group>
-    {/* Manija pesada y cerradura */}
-    <Box args={[0.08, 0.35, 0.16]} position={[-0.88, -0.1, 0.12]} castShadow>
+    {/* Manija pesada y cerradura ergonómica */}
+    <Box args={[0.1, 0.45, 0.18]} position={[-1.05, -0.25, 0.12]} castShadow>
       <meshStandardMaterial color="#a0a5a0" metalness={0.85} roughness={0.35} />
     </Box>
     {/* Letrero institucional de Murkoff */}
-    <Plane args={[1.6, 0.28]} position={[0, 2.15, 0.12]}>
+    <Plane args={[1.8, 0.32]} position={[0, 2.75, 0.12]}>
       <meshStandardMaterial color="#0c0e0c" roughness={0.5} />
     </Plane>
-    <Text position={[0, 2.15, 0.13]} fontSize={0.09} color="#e6dec8">
+    <Text position={[0, 2.75, 0.13]} fontSize={0.11} color="#e6dec8">
       PABELLÓN D // CONSULTA 04
     </Text>
     {/* Haz frío de luz que se filtra por debajo y por la mirilla desde el pasillo exterior del pabellón */}
-    <pointLight position={[0, -2.1, 0.4]} intensity={4.5} distance={3.8} color="#1d4d3d" />
-    <pointLight position={[0, 0.9, 0.3]} intensity={2.4} distance={2.5} color="#5e1212" />
+    <pointLight position={[0, -3.2, 0.4]} intensity={4.5} distance={4.2} color="#1d4d3d" />
+    <pointLight position={[0, 0.85, 0.3]} intensity={2.4} distance={2.8} color="#5e1212" />
   </group>
 );
 
@@ -224,54 +225,7 @@ const FlickeringFluorescentFixture = ({ position = [0, 5.05, 0.8], isCamcorderAc
   );
 };
 
-const PsychiatricMedsDebris = () => (
-  <group>
-    {/* Frasco de sedantes psiquiátricos volcado sobre la mesa */}
-    <group position={[0.95, 0.1, 0.85]} rotation={[0, 0.35, Math.PI / 2]}>
-      {/* Frasco translúcido ámbar */}
-      <mesh castShadow receiveShadow>
-        <cylinderGeometry args={[0.075, 0.075, 0.22, 16]} />
-        <meshStandardMaterial color="#8a4f15" roughness={0.3} metalness={0.1} transparent opacity={0.78} />
-      </mesh>
-      {/* Tapón blanco de seguridad */}
-      <mesh position={[0, 0.12, 0]} castShadow>
-        <cylinderGeometry args={[0.082, 0.082, 0.04, 16]} />
-        <meshStandardMaterial color="#ddd9ce" roughness={0.4} />
-      </mesh>
-      {/* Etiqueta rasgada de Murkoff Pharmaceuticals */}
-      <mesh position={[0, -0.01, 0]}>
-        <cylinderGeometry args={[0.076, 0.076, 0.14, 16, 1, true, 0, Math.PI * 1.5]} />
-        <meshStandardMaterial color="#ded7bf" roughness={0.9} side={THREE.DoubleSide} />
-      </mesh>
-    </group>
 
-    {/* Pastillas y cápsulas blancas desparramadas sobre la mesa de madera */}
-    {[
-      [0.82, 0.08, 0.68], [0.72, 0.08, 0.82], [1.14, 0.08, 0.95],
-      [0.65, 0.08, 0.98], [0.88, 0.08, 1.1]
-    ].map(([x, y, z], i) => (
-      <mesh key={i} position={[x, y, z]} castShadow>
-        <sphereGeometry args={[0.018, 8, 8]} />
-        <meshStandardMaterial color="#f0ede1" roughness={0.5} />
-      </mesh>
-    ))}
-
-    {/* Bandeja metálica quirúrgica con instrumental clínico oxidado */}
-    <group position={[2.9, 0.08, 1.25]} rotation={[0, -0.22, 0]}>
-      <RoundedBox args={[0.78, 0.04, 0.44]} radius={0.02} smoothness={2} castShadow receiveShadow>
-        <meshStandardMaterial color="#2d3330" roughness={0.45} metalness={0.75} />
-      </RoundedBox>
-      {/* Mancha de sangre seca dentro de la bandeja */}
-      <Plane args={[0.4, 0.22]} rotation={[-Math.PI / 2, 0, 0.2]} position={[0, 0.022, 0]}>
-        <meshBasicMaterial color="#350404" transparent opacity={0.7} />
-      </Plane>
-      {/* Bisturí / pinzas de metal */}
-      <Box args={[0.32, 0.012, 0.025]} position={[-0.1, 0.028, 0.04]} rotation={[0, 0.15, 0]} castShadow>
-        <meshStandardMaterial color="#9ea3a0" metalness={0.9} roughness={0.2} />
-      </Box>
-    </group>
-  </group>
-);
 
 const FilingCabinet = ({ position = [8.3, -1.9, -4.2], rotation = [0, -0.35, 0] }) => (
   <group position={position} rotation={rotation}>
@@ -534,7 +488,7 @@ const Room = ({ isCamcorderActive = false }) => (
     </Box>
 
     {/* Rótulo de SALIDA iluminado en rojo sobre la puerta pesada */}
-    <AsylumExitSign position={[6.2, 1.95, -5.12]} />
+    <AsylumExitSign position={[6.2, 2.75, -5.12]} />
 
     {/* Mensajes en sangre de pacientes / Padre Martin sobre los muros */}
     <BloodWallWritings />
@@ -715,30 +669,13 @@ const GrimeLayer = () => {
   );
 };
 
-const DeskScratches = () => {
-  const scratches = [
-    [-4.8, -1.65, 1.15, -0.08], [-3.65, -0.45, 0.68, 0.13], [-2.25, 2.05, 1.42, -0.04],
-    [-0.9, -1.1, 0.92, 0.2], [0.2, 2.18, 1.26, -0.13], [1.55, -1.75, 1.62, 0.08],
-    [3.3, 1.58, 1.36, 0.16], [4.92, -0.3, 0.94, -0.2], [5.52, 1.95, 0.7, 0.05]
-  ];
-  return (
-    <group>
-      {scratches.map(([x, z, length, rotation], index) => (
-        <Plane key={index} args={[length, index % 3 === 0 ? 0.024 : 0.014]} rotation={[-Math.PI / 2, 0, rotation]} position={[x, 0.077, z]}>
-          <meshBasicMaterial color={index % 2 ? '#130b06' : '#a27a4d'} transparent opacity={0.42} side={THREE.DoubleSide} />
-        </Plane>
-      ))}
-    </group>
-  );
-};
-
 const Desk = () => {
   const woodTexture = useMemo(() => makeTexture('wood'), []);
   useEffect(() => () => woodTexture.dispose(), [woodTexture]);
 
   return (
     <group>
-      {/* Tabla de madera pesada, con canto y patas visibles en la penumbra */}
+      {/* Tabla de madera pesada de hospital, con canto y patas visibles en la penumbra */}
       <RoundedBox args={[14, 0.48, 6]} radius={0.07} smoothness={3} position={[0, -0.2, 0]} receiveShadow castShadow>
         <meshStandardMaterial map={woodTexture} color="#76583c" roughness={0.91} metalness={0} />
       </RoundedBox>
@@ -754,24 +691,28 @@ const Desk = () => {
         </Box>
       ))}
       <GrimeLayer />
-      <DeskScratches />
-      {/* Salpicaduras PNG del paquete aportado, situadas en varias zonas de la cubierta. */}
-      <BloodTextureStain file="bloodslash_heavy.png" position={[0.25, 0.081, 1.68]} rotation={-0.16} size={[3.05, 1.72]} opacity={0.62} />
+      {/* Salpicaduras PNG orgánicas situadas naturalmente sobre la cubierta sin cortes abruptos */}
+      <BloodTextureStain file="bloodsplat.png" position={[0.2, 0.081, 1.45]} rotation={-0.1} size={[2.2, 1.25]} opacity={0.52} />
       <BloodTextureStain file="bloodspray.png" position={[-3.75, 0.081, -0.52]} rotation={0.48} size={[2.2, 1.24]} opacity={0.56} />
       <BloodTextureStain file="bloodsplat.png" position={[4.05, 0.081, -1.4]} rotation={-0.1} size={[2.15, 1.2]} opacity={0.6} />
       <BloodTextureStain file="bloodslash2.png" position={[4.65, 0.081, 1.42]} rotation={0.62} size={[1.7, 0.96]} opacity={0.58} />
-      {/* Atrezo psiquiátrico de Mount Massive: frasco de sedantes volcado, pastillas y bandeja clínica */}
-      <PsychiatricMedsDebris />
     </group>
   );
 };
 
-const Monitor = ({ onClick, isZooming }) => {
+const Monitor = ({ onClick, isZooming, isScreenActive, onClose }) => {
   const [hovered, setHovered] = useState(false);
-  useCursor(hovered && !isZooming);
+  useCursor(hovered && !isZooming && !isScreenActive);
+
   return (
-    <group position={[-2, 1.5, -1]} rotation={[0, 0.2, 0]} onClick={!isZooming ? onClick : null} onPointerOver={() => setHovered(true)} onPointerOut={() => setHovered(false)}>
-      {/* Base pesada, cuello articulado y carcasa con profundidad. */}
+    <group
+      position={[-2, 1.5, -1]}
+      rotation={[0, 0.2, 0]}
+      onClick={!isZooming && !isScreenActive ? onClick : null}
+      onPointerOver={() => setHovered(true)}
+      onPointerOut={() => setHovered(false)}
+    >
+      {/* Base pesada, cuello articulado y carcasa con profundidad */}
       <RoundedBox args={[1.72, 0.14, 1.08]} radius={0.05} smoothness={2} position={[0, -1.45, 0.04]} castShadow receiveShadow>
         <meshStandardMaterial color="#080909" roughness={0.52} metalness={0.62} />
       </RoundedBox>
@@ -784,20 +725,44 @@ const Monitor = ({ onClick, isZooming }) => {
       <RoundedBox args={[3.52, 2.34, 0.42]} radius={0.08} smoothness={3} castShadow receiveShadow>
         <meshStandardMaterial color="#111416" roughness={0.36} metalness={0.74} />
       </RoundedBox>
-      {/* Bisel interior y vidrio hundido: evita el aspecto de caja plana. */}
+      {/* Bisel interior y vidrio hundido */}
       <RoundedBox args={[3.27, 2.09, 0.07]} radius={0.025} smoothness={2} position={[0, 0, 0.235]}>
         <meshStandardMaterial color="#020706" roughness={0.2} metalness={0.55} />
       </RoundedBox>
-      <Plane args={[3.06, 1.88]} position={[0, 0.02, 0.277]}>
-        <meshBasicMaterial color={hovered ? "#2ba85c" : "#0a2c1a"} />
+
+      {/* Pantalla base oscura de fondo */}
+      <Plane args={[3.06, 1.88]} position={[0, 0.02, 0.27]}>
+        <meshBasicMaterial color="#00138c" />
       </Plane>
+
+      {/* LED de encendido del monitor */}
       <Box args={[0.16, 0.08, 0.04]} position={[1.48, -1.01, 0.27]}>
-        <meshBasicMaterial color={hovered ? "#5cff8f" : "#214c31"} />
+        <meshBasicMaterial color="#3585ff" />
       </Box>
-      <pointLight position={[0, 0, 1]} intensity={hovered ? 3 : 1.1} distance={8} color="#2ecc71" />
-      <Text position={[0, 0, 0.29]} fontSize={0.25} color="#020604">
-        {hovered ? "> ACCEDER" : "SYS.ONLINE"}
-      </Text>
+
+      {/* Luz ambiente emitida por la pantalla azul de Windows XP sobre el escritorio */}
+      <pointLight position={[0, 0, 0.9]} intensity={1.8} distance={5} color="#2a68e8" />
+
+      {/* Pantalla Interactiva Windows XP alojada físicamente en el monitor */}
+      <group position={[0, 0.02, 0.282]}>
+        <Html
+          transform
+          position={[0, 0, 0]}
+          scale={0.003825}
+          wrapperClass="xp-screen-container"
+        >
+          <div
+            style={{ width: '800px', height: '492px' }}
+            className="rounded-sm overflow-hidden select-none shadow-2xl"
+          >
+            <WindowsXPScreen
+              isZoomedIn={isScreenActive}
+              onZoomIn={onClick}
+              onClose={onClose}
+            />
+          </div>
+        </Html>
+      </group>
     </group>
   );
 };
@@ -835,51 +800,6 @@ const DocumentFolder = ({ onClick, isZooming }) => {
           [Clic] Leer Expediente
         </Text>
       )}
-    </group>
-  );
-};
-
-const UnstableDeskLight = () => {
-  const light = useRef();
-  const nextFailure = useRef(3.5);
-  const failureEnds = useRef(0);
-
-  useFrame(({ clock }) => {
-    const time = clock.getElapsedTime();
-    if (time > nextFailure.current) {
-      failureEnds.current = time + 0.08 + Math.random() * 0.24;
-      nextFailure.current = time + 3.5 + Math.random() * 7;
-    }
-    const failing = time < failureEnds.current;
-    // Caída violenta de tensión y micro-parpadeo sucio de lámpara hospitalaria
-    const flutter = failing ? (Math.sin(time * 110) > 0.08 ? 0.12 : 0.48) : 1;
-    const naturalVariation = 0.94 + Math.sin(time * 2.1) * 0.035;
-    if (light.current) {
-      light.current.intensity = THREE.MathUtils.lerp(light.current.intensity, 980 * flutter * naturalVariation, 0.2);
-    }
-  });
-
-  return (
-    <group>
-      {/* Bombilla incandescente sucia de filamento con luz amarillenta-verdosa amortiguada */}
-      <spotLight
-        ref={light}
-        position={[0.6, 5, 1.4]}
-        angle={0.75}
-        penumbra={0.78}
-        intensity={980}
-        color="#baa05b"
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-        shadow-bias={-0.0002}
-        decay={2}
-        distance={16}
-      />
-      <pointLight position={[0.6, 4.72, 1.4]} intensity={7.5} distance={3} color="#948245" />
-      <mesh position={[0.6, 4.7, 1.4]}>
-        <sphereGeometry args={[0.16, 16, 16]} />
-        <meshBasicMaterial color="#bfa767" />
-      </mesh>
     </group>
   );
 };
@@ -1179,15 +1099,16 @@ const CameraController = ({
     }
     else if (target === 'terminal') {
       currentYaw.current = THREE.MathUtils.lerp(currentYaw.current, 0, 0.1);
-      const monPos = new THREE.Vector3(-1.8, 1.5, 0.8);
+      // Cámara centrada a distancia natural (~1.74 unidades) para que el monitor ocupe ~72% de la pantalla y el entorno 3D siga visible
+      const monPos = new THREE.Vector3(-1.75, 1.54, 0.72);
       camera.position.lerp(monPos, 0.08);
 
-      const lookTarget = new THREE.Vector3(-2, 1.5, -1);
+      const lookTarget = new THREE.Vector3(-2.0, 1.5, -1.0);
       const currentLookAt = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion).add(camera.position);
       currentLookAt.lerp(lookTarget, 0.1);
       camera.lookAt(currentLookAt);
 
-      if (camera.position.distanceTo(monPos) < 0.1) onReachedTarget('terminal');
+      if (camera.position.distanceTo(monPos) < 0.08) onReachedTarget('terminal');
     }
   });
 
@@ -1226,19 +1147,6 @@ const DocumentOverlay = ({ onClose }) => (
           Cerrar Documento
         </button>
       </div>
-    </div>
-  </div>
-);
-
-const TerminalOverlay = ({ onClose }) => (
-  <div className="absolute inset-0 z-50 bg-[#020202] text-murkoff-paper flex flex-col p-4 animate-in fade-in zoom-in-95 duration-500">
-    <div className="crt-overlay opacity-50"></div>
-    <div className="flex justify-between items-center border-b-2 border-[#0a4a22] pb-2 mb-4 bg-black p-4">
-      <h2 className="text-2xl font-bold text-[#3dff84] tracking-widest font-mono filter drop-shadow-[0_0_8px_rgba(61,255,132,0.8)]">SISTEMA TERMINAL v3.1 // MURKOFF CORP</h2>
-      <button onClick={onClose} className="text-[#8a0303] font-bold hover:text-white border border-[#8a0303] px-4 py-1">APAGAR SISTEMA</button>
-    </div>
-    <div className="flex-1 overflow-y-auto">
-      <InvestigationFiles />
     </div>
   </div>
 );
@@ -1394,12 +1302,12 @@ export default function DesktopScene() {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
       if (e.key === 'Escape') {
-        if (activeOverlay !== 'none') {
+        if (activeOverlay !== 'none' || animatingTo === 'terminal') {
           handleClose();
         } else if (isCamcorderActive) {
           handleToggleCamcorder();
         }
-      } else if (activeOverlay === 'none') {
+      } else if (activeOverlay === 'none' && animatingTo !== 'terminal') {
         // Atajos de teclado para girar 90° libremente
         if (e.key === 'ArrowRight' || e.key === 'e' || e.key === 'E') {
           handleTurn('right');
@@ -1410,7 +1318,7 @@ export default function DesktopScene() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeOverlay, isCamcorderActive]);
+  }, [activeOverlay, animatingTo, isCamcorderActive]);
 
   return (
     <div className="w-screen h-screen relative bg-black overflow-hidden cursor-crosshair">
@@ -1422,13 +1330,12 @@ export default function DesktopScene() {
           {/* En visión nocturna, las luces ambientales se reducen al mínimo para el contraste terrorífico de Outlast */}
           <ambientLight intensity={isCamcorderActive ? 0.015 : 0.08} color="#16221a" />
           <hemisphereLight args={['#29362c', '#080c09', isCamcorderActive ? 0.02 : 0.22]} />
-          {!isCamcorderActive && <UnstableDeskLight />}
 
-          {/* Rebote sucio y frío estilo hospital psiquiátrico Mount Massive en modo normal */}
+          {/* Rebote frío y sucio estilo hospital psiquiátrico Mount Massive en modo normal */}
           {!isCamcorderActive && (
             <>
               <pointLight position={[-5, 1.5, -1]} intensity={11} distance={6.5} color="#1c3629" />
-              <pointLight position={[-3.8, 1.15, 0.7]} intensity={12} distance={4.5} color="#8a7947" />
+              <pointLight position={[-3.8, 1.15, 0.7]} intensity={5} distance={4.5} color="#1d3628" />
             </>
           )}
 
@@ -1438,7 +1345,12 @@ export default function DesktopScene() {
           <Room isCamcorderActive={isCamcorderActive} />
           <Suspense fallback={null}>
             <Desk />
-            <Monitor onClick={() => handleOpen('terminal')} isZooming={animatingTo !== 'none'} />
+            <Monitor
+              onClick={() => handleOpen('terminal')}
+              isZooming={animatingTo !== 'none'}
+              isScreenActive={animatingTo === 'terminal' || activeOverlay === 'terminal'}
+              onClose={handleClose}
+            />
             <DocumentFolder onClick={() => handleOpen('document')} isZooming={animatingTo !== 'none'} />
             {/* La cámara desaparece al agarrarla y solo reaparece en la mesa cuando la pantalla está completamente en negro */}
             {isCameraOnDesk && (
@@ -1466,7 +1378,7 @@ export default function DesktopScene() {
       </div>
 
       {/* Indicadores visuales interactivos de giro de 90° al llegar al límite de la pantalla */}
-      {activeOverlay === 'none' && (
+      {activeOverlay === 'none' && animatingTo !== 'terminal' && (
         <>
           <div
             onClick={(e) => {
@@ -1511,12 +1423,25 @@ export default function DesktopScene() {
         onToggleActive={handleToggleCamcorder}
         zoom={zoomLevel}
         onZoomChange={setZoomLevel}
-        isDocumentOrTerminalOpen={activeOverlay !== 'none'}
+        isDocumentOrTerminalOpen={activeOverlay !== 'none' || animatingTo === 'terminal'}
       />
+
+      {/* Botón flotante para alejarse del monitor y volver a la vista del escritorio */}
+      {(animatingTo === 'terminal' || activeOverlay === 'terminal') && (
+        <div className="fixed top-5 right-5 z-40 animate-in fade-in duration-300 pointer-events-auto">
+          <button
+            onClick={handleClose}
+            className="bg-black/90 hover:bg-[#8a0303] text-white border border-[#3b5998] hover:border-red-500 px-4 py-2.5 rounded shadow-2xl font-mono text-xs tracking-widest uppercase flex items-center gap-2 cursor-pointer transition-all duration-200 backdrop-blur-md group"
+            title="Alejarse de la pantalla (o presiona ESC)"
+          >
+            <span className="text-sm font-bold text-blue-300 group-hover:text-white">✕</span>
+            <span>ALEJARSE DEL MONITOR (ESC)</span>
+          </button>
+        </div>
+      )}
 
       {/* Overlays */}
       {activeOverlay === 'document' && <DocumentOverlay onClose={handleClose} />}
-      {activeOverlay === 'terminal' && <TerminalOverlay onClose={handleClose} />}
     </div>
   );
 }
