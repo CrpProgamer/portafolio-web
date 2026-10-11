@@ -1,21 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { playSound } from '../utils/audioManager.js';
 
-// Reproducción de efectos de sonido de la cámara mediante archivos .wav
+// Reproducción de efectos de sonido de la cámara mediante el AudioManager pre-cargado
 export const playCamcorderSound = (type) => {
-  try {
-    const soundMap = {
-      nightvision_on: '/assets/sounds/nightvision_on.wav',
-      nightvision_off: '/assets/sounds/nightvision_off.wav',
-      reload_battery: '/assets/sounds/battery_reload.wav',
-      low_battery_beep: '/assets/sounds/low_battery.wav',
-    };
-    const src = soundMap[type];
-    if (src) {
-      const audio = new Audio(src);
-      audio.volume = 0.7;
-      audio.play().catch(() => {});
-    }
-  } catch (err) {}
+  const map = {
+    nightvision_on: 'nightvision_on',
+    nightvision_off: 'nightvision_off',
+    reload_battery: 'battery_reload',
+    low_battery_beep: 'low_battery',
+  };
+  const key = map[type];
+  if (key) {
+    playSound(key, 0.85);
+  }
 };
 
 export default function OutlastCamcorderOverlay({
@@ -31,7 +28,7 @@ export default function OutlastCamcorderOverlay({
   const [timecode, setTimecode] = useState({ hours: 0, minutes: 44, seconds: 6, frames: 69 });
   const [audioFeedback, setAudioFeedback] = useState(true);
 
-  // Reproducir sonido al activar / desactivar la videocámara
+  // Reproducir sonido al activar / desactivar la videocámara (latencia cero con audio precargado)
   const prevActiveRef = useRef(isActive);
   useEffect(() => {
     if (prevActiveRef.current !== isActive) {
@@ -131,58 +128,60 @@ export default function OutlastCamcorderOverlay({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isActive, onToggleActive, zoom, onZoomChange, batteryCount]);
 
-  if (!isActive) return null;
-
-  const overlayDimClass = isDocumentOrTerminalOpen ? 'opacity-20 pointer-events-none' : 'opacity-100';
+  const overlayVisibilityClass = isActive
+    ? isDocumentOrTerminalOpen
+      ? 'opacity-20 pointer-events-none'
+      : 'opacity-100 pointer-events-auto'
+    : 'opacity-0 pointer-events-none';
   const segmentsFilled = Math.ceil((batteryLevel / 100) * 4);
 
   return (
-    <div className={`fixed inset-0 z-40 pointer-events-none select-none transition-opacity duration-300 ${overlayDimClass}`}>
+    <div className={`fixed inset-0 z-40 select-none transition-opacity duration-200 ${overlayVisibilityClass}`}>
       {/* =========================================================================
           LENTE DE VISIÓN NOCTURNA OUTLAST:
-          Centro transparente/nítido y bordes fundidos en NEGRO PURO (#000000)
+          Centro transparente/nítido y bordes con viñeteado óptico analógico
           ========================================================================= */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* 1. Máscara de tubo de lente circular/ovalada de Outlast */}
+        {/* 1. Máscara de tubo de lente circular de Outlast (sin bloquear la visión) */}
         <div
           className="absolute inset-0"
           style={{
             background: `
               radial-gradient(
-                ellipse 78% 70% at 50% 50%,
+                ellipse 88% 82% at 50% 50%,
                 rgba(0, 0, 0, 0) 0%,
-                rgba(0, 0, 0, 0) 58%,
-                rgba(0, 10, 4, 0.35) 76%,
-                rgba(0, 5, 2, 0.72) 90%,
-                rgba(0, 0, 0, 0.92) 100%
+                rgba(0, 0, 0, 0) 66%,
+                rgba(0, 15, 6, 0.22) 80%,
+                rgba(0, 10, 4, 0.45) 92%,
+                rgba(0, 0, 0, 0.75) 100%
               )
             `,
           }}
         />
 
-        {/* 2. Color Grading de Fósforo P43 / IR con amplificación de luz nocturna */}
+        {/* 2. Color Grading de Fósforo P43 / IR con amplificación de luz nocturna (sin oscurecer sombras) */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            backdropFilter: 'contrast(1.28) brightness(1.18) saturate(0.55) hue-rotate(65deg)',
-            WebkitBackdropFilter: 'contrast(1.28) brightness(1.18) saturate(0.55) hue-rotate(65deg)',
+            backdropFilter: 'brightness(1.22) contrast(1.10) saturate(0.70) hue-rotate(48deg)',
+            WebkitBackdropFilter: 'brightness(1.22) contrast(1.10) saturate(0.70) hue-rotate(48deg)',
           }}
         />
 
-        {/* 3. Tinte verde nocturno sutil (no lavado) */}
+        {/* 3. Tinte verde fosforescente nocturno (ilumina zonas oscuras) */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: 'rgba(25, 80, 50, 0.18)',
-            mixBlendMode: 'color-dodge',
+            background: 'rgba(28, 95, 52, 0.20)',
+            mixBlendMode: 'screen',
           }}
         />
 
-        {/* 4. Ruido/Estática de sensor analógico fino de alta frecuencia (Overlay sutil con opacidad reducida) */}
+        {/* 4. Ruido/Estática de sensor analógico fino de alta frecuencia */}
         <div
           className="absolute inset-0 mix-blend-overlay outlast-grain-animation pointer-events-none"
           style={{
-            opacity: 0.18,
+            opacity: 0.14,
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
             backgroundRepeat: 'repeat',
             backgroundSize: '160px 160px',

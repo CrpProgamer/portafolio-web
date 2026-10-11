@@ -2,6 +2,7 @@ import { Suspense, useState, useEffect, useMemo, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { Box, Plane, Text, useCursor, RoundedBox, useGLTF, useTexture, Center, Html } from '@react-three/drei';
 import * as THREE from 'three';
+import { playSound } from '../utils/audioManager.js';
 import InvestigationFiles from './InvestigationFiles.jsx';
 import OutlastCamcorderOverlay from './OutlastCamcorderOverlay.jsx';
 import OutlastDocumentOverlay from './OutlastDocumentOverlay.jsx';
@@ -450,12 +451,12 @@ const CamcorderIRSpotlight = ({ active, zoom = 1.0 }) => {
       targetRef.current.updateMatrixWorld();
 
       spotRef.current.target = targetRef.current;
-      spotRef.current.intensity = 1100 * Math.min(1.8, zoom);
+      spotRef.current.intensity = 1800 * Math.min(1.8, zoom);
     }
 
     if (fillLightRef.current) {
       fillLightRef.current.position.copy(camera.position);
-      fillLightRef.current.intensity = 35;
+      fillLightRef.current.intensity = 70;
     }
   });
 
@@ -464,19 +465,19 @@ const CamcorderIRSpotlight = ({ active, zoom = 1.0 }) => {
       <spotLight
         ref={spotRef}
         intensity={0}
-        distance={35}
-        angle={1.05}
-        penumbra={0.65}
-        color="#92ffa8"
-        decay={1.1}
+        distance={45}
+        angle={1.15}
+        penumbra={0.7}
+        color="#a6ffb8"
+        decay={1.0}
         castShadow={false}
       />
       <pointLight
         ref={fillLightRef}
         intensity={0}
-        distance={22}
-        color="#32a85e"
-        decay={1.05}
+        distance={30}
+        color="#3ec76e"
+        decay={1.0}
       />
     </>
   );
@@ -1312,7 +1313,7 @@ export default function DesktopScene() {
   const [hoveredItem, setHoveredItem] = useState(null); // 'terminal' | 'document' | 'camcorder' | null
   const [isCamcorderActive, setIsCamcorderActive] = useState(false);
   const [isCameraOnDesk, setIsCameraOnDesk] = useState(true);
-  const [isCameraTransitioning, setIsCameraTransitioning] = useState(false);
+  const [sensorFlash, setSensorFlash] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [baseYaw, setBaseYaw] = useState(0); // Ángulo base de rotación en pasos de 90°
   const lastTurnTime = useRef(0);
@@ -1354,11 +1355,7 @@ export default function DesktopScene() {
   }, [isCamcorderActive]);
 
   const playTurnSound = () => {
-    try {
-      const audio = new Audio('/assets/sounds/camera_turn.wav');
-      audio.volume = 0.5;
-      audio.play().catch(() => {});
-    } catch (err) {}
+    playSound('camera_turn', 0.5);
   };
 
   const handleTurn = (direction) => {
@@ -1382,43 +1379,25 @@ export default function DesktopScene() {
 
   const handleToggleCamcorder = () => {
     if (!isCamcorderActive) {
-      // Reproducir el sonido .wav de agarrar la cámara
-      try {
-        const pickupSound = new Audio('/assets/sounds/camera_pickup.wav');
-        pickupSound.volume = 0.95;
-        pickupSound.play().catch(() => {});
-      } catch (err) {}
+      // Reproducir sonido de agarrar la cámara de inmediato sin latencia
+      playSound('camera_pickup', 0.95);
 
-      // La cámara física desaparece de la mesa de inmediato al ser agarrada
+      // La cámara desaparece de la mesa
       setIsCameraOnDesk(false);
 
-      // Activar efecto cinemático de parpadeo a negro de 1 segundo
-      setIsCameraTransitioning(true);
+      // Micro-destello de apertura de sensor infrarrojo fosforescente (90ms, sin pantalla negra)
+      setSensorFlash(true);
+      setTimeout(() => setSensorFlash(false), 90);
 
-      // Activar la visión nocturna en el punto de oscuridad total (400ms)
-      setTimeout(() => {
-        setIsCamcorderActive(true);
-        setZoomLevel(1.0);
-      }, 400);
-
-      setTimeout(() => {
-        setIsCameraTransitioning(false);
-      }, 950);
+      // Activar visión nocturna y visor inmediatamente
+      setIsCamcorderActive(true);
+      setZoomLevel(1.0);
     } else {
-      // Bajar la videocámara (dejar de usar la cámara)
-      setIsCameraTransitioning(true);
-
-      // La cámara física reaparece en la mesa y se apaga el modo nocturno ÚNICAMENTE
-      // cuando la pantalla está al 100% en negro (450ms), evitando que aparezca antes
-      setTimeout(() => {
-        setIsCamcorderActive(false);
-        setIsCameraOnDesk(true);
-        setZoomLevel(1.0);
-      }, 450);
-
-      setTimeout(() => {
-        setIsCameraTransitioning(false);
-      }, 950);
+      // Bajar la videocámara de inmediato
+      playSound('nightvision_off', 0.85);
+      setIsCamcorderActive(false);
+      setIsCameraOnDesk(true);
+      setZoomLevel(1.0);
     }
   };
 
@@ -1476,25 +1455,25 @@ export default function DesktopScene() {
 
           {/* Iluminación base adaptada: En visión nocturna el ambiente se tiñe de fósforo verde */}
           <ambientLight
-            intensity={isCamcorderActive ? 0.45 : 0.08}
-            color={isCamcorderActive ? "#236339" : "#16221a"}
+            intensity={isCamcorderActive ? 1.5 : 0.08}
+            color={isCamcorderActive ? "#1e5c33" : "#16221a"}
           />
           <hemisphereLight
-            args={isCamcorderActive ? ['#42a862', '#10331b', 0.65] : ['#29362c', '#080c09', 0.22]}
+            args={isCamcorderActive ? ['#4ecc78', '#143c22', 1.15] : ['#29362c', '#080c09', 0.22]}
           />
 
           {/* Rebote ambiental de hospital psiquiátrico */}
           <pointLight
             position={[-5, 1.5, -1]}
-            intensity={isCamcorderActive ? 8 : 11}
-            distance={6.5}
-            color={isCamcorderActive ? "#297a48" : "#1c3629"}
+            intensity={isCamcorderActive ? 14 : 11}
+            distance={8.5}
+            color={isCamcorderActive ? "#34a85c" : "#1c3629"}
           />
           <pointLight
             position={[-3.8, 1.15, 0.7]}
-            intensity={isCamcorderActive ? 5 : 5}
-            distance={4.5}
-            color={isCamcorderActive ? "#247040" : "#1d3628"}
+            intensity={isCamcorderActive ? 9 : 5}
+            distance={6.0}
+            color={isCamcorderActive ? "#2b8c4c" : "#1d3628"}
           />
 
           {/* Linterna Infrarroja (IR Spotlight) que ilumina hacia donde mira el jugador con zoom dinámico */}
@@ -1579,9 +1558,9 @@ export default function DesktopScene() {
         </>
       )}
 
-      {/* Transición cinemática de parpadeo a negro (1 segundo) al agarrar la cámara */}
-      {isCameraTransitioning && (
-        <div className="fixed inset-0 z-50 bg-black pointer-events-none animate-camera-blink" />
+      {/* Micro-destello de activación de sensor infrarrojo fosforescente (90ms, sin pantalla negra) */}
+      {sensorFlash && (
+        <div className="fixed inset-0 z-40 bg-[#52ff94]/15 pointer-events-none transition-opacity duration-100" />
       )}
 
       {/* Visión Nocturna y HUD de Videocámara Outlast (100% fiel a la referencia) */}
@@ -1661,3 +1640,11 @@ export default function DesktopScene() {
 useGLTF.preload('/assets/models/keyboard.glb');
 useGLTF.preload('/assets/models/low_poly_outlast_camera.glb');
 useGLTF.preload('/assets/models/skeleton.glb');
+useTexture.preload('/assets/textures/wall/concrete_block_wall_diff_1k.jpg');
+useTexture.preload('/assets/textures/wall/concrete_block_wall_nor_1k.jpg');
+useTexture.preload('/assets/textures/wall/concrete_block_wall_rough_1k.jpg');
+useTexture.preload('/assets/textures/blood/bloodslash_heavy.png');
+useTexture.preload('/assets/textures/blood/bloodspray.png');
+useTexture.preload('/assets/textures/blood/bloodslash1.png');
+useTexture.preload('/assets/textures/blood/bloodsplat.png');
+useTexture.preload('/assets/textures/blood/bloodslash2.png');

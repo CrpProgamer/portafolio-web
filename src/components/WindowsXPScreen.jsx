@@ -1,47 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
+import { playSound, playKeyboardSound } from '../utils/audioManager.js';
 
-// Reproducción de efectos de sonido mediante archivos .wav y .mp3
+// Reproducción de efectos de sonido pre-cargados con latencia cero
 const playXPChime = () => {
-  try {
-    const audio = new Audio('/assets/sounds/xp_startup.mp3');
-    audio.volume = 0.8;
-    audio.play().catch(() => {
-      new Audio('/assets/sounds/xp_startup.wav').play().catch(() => {});
-    });
-  } catch (err) {}
+  playSound('xp_startup', 0.8);
 };
 
 const playXPClick = () => {
-  try {
-    const audio = new Audio('/assets/sounds/xp_click.mp3');
-    audio.volume = 0.55;
-    audio.play().catch(() => {
-      new Audio('/assets/sounds/xp_click.wav').play().catch(() => {});
-    });
-  } catch (err) {}
+  playSound('xp_click', 0.55);
 };
 
 export const playKeySound = (key) => {
-  try {
-    let src;
-    if (key === ' ' || key === 'Space' || key === 'Spacebar') {
-      src = '/assets/sounds/Space.wav';
-    } else {
-      const keys = ['/assets/sounds/Key1.wav', '/assets/sounds/key2.wav', '/assets/sounds/key3.wav'];
-      src = keys[Math.floor(Math.random() * keys.length)];
-    }
-    const audio = new Audio(src);
-    audio.volume = 0.45;
-    audio.play().catch(() => {});
-  } catch (err) {}
+  playKeyboardSound(key === ' ' || key === 'Space' || key === 'Spacebar');
 };
 
 const playTerminalBeep = () => {
-  try {
-    const audio = new Audio('/assets/sounds/terminal_beep.wav');
-    audio.volume = 0.45;
-    audio.play().catch(() => {});
-  } catch (err) {}
+  playSound('terminal_beep', 0.45);
 };
 
 export default function WindowsXPScreen({ isZoomedIn = false, onZoomIn = () => {}, onClose = () => {} }) {

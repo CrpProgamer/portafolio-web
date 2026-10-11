@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { playSound } from '../utils/audioManager.js';
 
 export default function OutlastMainMenu({ onStartGame, onResetGame }) {
   const [selectedIdx, setSelectedIdx] = useState(0);
@@ -20,19 +21,11 @@ export default function OutlastMainMenu({ onStartGame, onResetGame }) {
   ];
 
   const playHoverSound = () => {
-    try {
-      const audio = new Audio('/assets/sounds/xp_click.wav');
-      audio.volume = 0.25;
-      audio.play().catch(() => {});
-    } catch (e) {}
+    playSound('xp_click', 0.25);
   };
 
   const playSelectSound = () => {
-    try {
-      const audio = new Audio('/assets/sounds/camera_pickup.wav');
-      audio.volume = 0.6;
-      audio.play().catch(() => {});
-    } catch (e) {}
+    playSound('camera_pickup', 0.6);
   };
 
   const handleSelect = (index) => {
