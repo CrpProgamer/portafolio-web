@@ -790,9 +790,9 @@ const Desk = () => {
   );
 };
 
-const Monitor = ({ onClick, isZooming, isScreenActive, onClose, onHover, onUnhover }) => {
+const Monitor = ({ onClick, isZooming, isScreenActive, isInMainMenu = false, onClose, onHover, onUnhover }) => {
   const [hovered, setHovered] = useState(false);
-  useCursor(hovered && !isZooming && !isScreenActive);
+  useCursor(hovered && !isZooming && !isScreenActive && !isInMainMenu);
 
   return (
     <group
@@ -850,29 +850,32 @@ const Monitor = ({ onClick, isZooming, isScreenActive, onClose, onHover, onUnhov
         </Plane>
       )}
 
-      {/* Pantalla Interactiva alojada físicamente en el monitor */}
-      <group position={[0, 0.02, 0.282]}>
-        <Html
-          transform
-          position={[0, 0, 0]}
-          scale={0.11953}
-          pointerEvents={isScreenActive ? 'auto' : 'none'}
-          wrapperClass={`xp-screen-container ${isScreenActive ? 'pointer-events-auto' : 'pointer-events-none'}`}
-        >
-          <div
-            style={{ width: '1024px', height: '629px' }}
-            className={`rounded-sm overflow-hidden select-none shadow-2xl ${
-              isScreenActive ? 'pointer-events-auto' : 'pointer-events-none'
-            }`}
+      {/* Pantalla Interactiva alojada físicamente en el monitor (oculta cuando el Menú Principal está activo) */}
+      {!isInMainMenu && (
+        <group position={[0, 0.02, 0.282]}>
+          <Html
+            transform
+            position={[0, 0, 0]}
+            scale={0.11953}
+            pointerEvents={isScreenActive ? 'auto' : 'none'}
+            wrapperClass={`xp-screen-container ${isScreenActive ? 'pointer-events-auto' : 'pointer-events-none'}`}
+            zIndexRange={[40, 0]}
           >
-            <WindowsXPScreen
-              isZoomedIn={isScreenActive}
-              onZoomIn={onClick}
-              onClose={onClose}
-            />
-          </div>
-        </Html>
-      </group>
+            <div
+              style={{ width: '1024px', height: '629px' }}
+              className={`rounded-sm overflow-hidden select-none shadow-2xl ${
+                isScreenActive ? 'pointer-events-auto' : 'pointer-events-none'
+              }`}
+            >
+              <WindowsXPScreen
+                isZoomedIn={isScreenActive}
+                onZoomIn={onClick}
+                onClose={onClose}
+              />
+            </div>
+          </Html>
+        </group>
+      )}
     </group>
   );
 };
@@ -1486,6 +1489,7 @@ export default function DesktopScene() {
               onClick={() => handleOpen('terminal')}
               isZooming={animatingTo !== 'none'}
               isScreenActive={animatingTo === 'terminal' || activeOverlay === 'terminal'}
+              isInMainMenu={isInMainMenu}
               onClose={handleClose}
               onHover={setHoveredItem}
               onUnhover={() => setHoveredItem(null)}
@@ -1573,7 +1577,7 @@ export default function DesktopScene() {
       />
 
       {/* In-Game HUD Interaction Prompt (Foto 4: "Pulsa (BOTÓN IZQUIERDO DEL RATÓN) para coger Documento", etc.) */}
-      {hoveredItem && animatingTo === 'none' && activeOverlay === 'none' && (
+      {hoveredItem && animatingTo === 'none' && activeOverlay === 'none' && !isInMainMenu && (
         <div className="fixed bottom-10 left-0 right-0 z-30 flex justify-center pointer-events-none select-none animate-in fade-in duration-200">
           <div className="bg-black/75 border border-white/20 text-[#eaeaea] px-6 py-2 rounded-xs font-typewriter text-xs sm:text-sm tracking-wider shadow-[0_4px_30px_rgba(0,0,0,0.95)] backdrop-blur-sm flex items-center gap-2">
             <span>Pulsa</span>

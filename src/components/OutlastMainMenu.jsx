@@ -88,7 +88,7 @@ export default function OutlastMainMenu({ onStartGame, onResetGame }) {
   }, [selectedIdx, activeModal]);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black select-none overflow-hidden font-typewriter outlast-cursor">
+    <div className="fixed inset-0 z-[100] bg-black select-none overflow-hidden font-typewriter outlast-cursor">
       {/* 1. Fondo atmosférico de pasillo con silla de ruedas en visión nocturna (Fotos 1 y 2) */}
       <div className="absolute inset-0 overflow-hidden">
         <img
