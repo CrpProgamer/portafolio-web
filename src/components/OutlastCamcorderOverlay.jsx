@@ -139,41 +139,41 @@ export default function OutlastCamcorderOverlay({
     <div className={`fixed inset-0 z-40 select-none transition-opacity duration-200 ${overlayVisibilityClass}`}>
       {/* =========================================================================
           LENTE DE VISIÓN NOCTURNA OUTLAST:
-          Centro transparente/nítido y bordes con viñeteado óptico analógico
+          Tubo óptico auténtico, viñeteado cinematográfico y grano analógico
           ========================================================================= */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {/* 1. Máscara de tubo de lente circular de Outlast (sin bloquear la visión) */}
+        {/* 1. Máscara de tubo de lente ovalada de Outlast con viñeteado periférico */}
         <div
           className="absolute inset-0"
           style={{
             background: `
               radial-gradient(
-                ellipse 88% 82% at 50% 50%,
+                ellipse 76% 68% at 50% 50%,
                 rgba(0, 0, 0, 0) 0%,
-                rgba(0, 0, 0, 0) 66%,
-                rgba(0, 15, 6, 0.22) 80%,
-                rgba(0, 10, 4, 0.45) 92%,
-                rgba(0, 0, 0, 0.75) 100%
+                rgba(0, 0, 0, 0) 52%,
+                rgba(0, 15, 6, 0.40) 74%,
+                rgba(0, 7, 3, 0.82) 88%,
+                rgba(0, 0, 0, 0.96) 100%
               )
             `,
           }}
         />
 
-        {/* 2. Color Grading de Fósforo P43 / IR con amplificación de luz nocturna (sin oscurecer sombras) */}
+        {/* 2. Color Grading de Fósforo P43 / IR con contraste tétrico auténtico */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            backdropFilter: 'brightness(1.22) contrast(1.10) saturate(0.70) hue-rotate(48deg)',
-            WebkitBackdropFilter: 'brightness(1.22) contrast(1.10) saturate(0.70) hue-rotate(48deg)',
+            backdropFilter: 'contrast(1.24) brightness(1.05) saturate(0.60) hue-rotate(58deg)',
+            WebkitBackdropFilter: 'contrast(1.24) brightness(1.05) saturate(0.60) hue-rotate(58deg)',
           }}
         />
 
-        {/* 3. Tinte verde fosforescente nocturno (ilumina zonas oscuras) */}
+        {/* 3. Tinte verde fosforescente militar analógico */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: 'rgba(28, 95, 52, 0.20)',
-            mixBlendMode: 'screen',
+            background: 'rgba(16, 56, 30, 0.18)',
+            mixBlendMode: 'color-dodge',
           }}
         />
 
@@ -181,18 +181,18 @@ export default function OutlastCamcorderOverlay({
         <div
           className="absolute inset-0 mix-blend-overlay outlast-grain-animation pointer-events-none"
           style={{
-            opacity: 0.14,
+            opacity: 0.18,
             backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
             backgroundRepeat: 'repeat',
             backgroundSize: '160px 160px',
           }}
         />
 
-        {/* 5. Scanlines analógicas muy tenues */}
+        {/* 5. Scanlines analógicas tenues de sensor de videocámara */}
         <div
-          className="absolute inset-0 opacity-15 pointer-events-none"
+          className="absolute inset-0 opacity-18 pointer-events-none"
           style={{
-            backgroundImage: 'repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.35) 0px, rgba(0, 0, 0, 0.35) 1px, transparent 1px, transparent 3px)',
+            backgroundImage: 'repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.4) 0px, rgba(0, 0, 0, 0.4) 1px, transparent 1px, transparent 3px)',
             backgroundSize: '100% 3px',
           }}
         />

@@ -451,12 +451,12 @@ const CamcorderIRSpotlight = ({ active, zoom = 1.0 }) => {
       targetRef.current.updateMatrixWorld();
 
       spotRef.current.target = targetRef.current;
-      spotRef.current.intensity = 1800 * Math.min(1.8, zoom);
+      spotRef.current.intensity = 1350 * Math.min(1.8, zoom);
     }
 
     if (fillLightRef.current) {
       fillLightRef.current.position.copy(camera.position);
-      fillLightRef.current.intensity = 70;
+      fillLightRef.current.intensity = 24;
     }
   });
 
@@ -465,19 +465,19 @@ const CamcorderIRSpotlight = ({ active, zoom = 1.0 }) => {
       <spotLight
         ref={spotRef}
         intensity={0}
-        distance={45}
-        angle={1.15}
-        penumbra={0.7}
-        color="#a6ffb8"
-        decay={1.0}
+        distance={38}
+        angle={0.92}
+        penumbra={0.8}
+        color="#85ff9e"
+        decay={1.1}
         castShadow={false}
       />
       <pointLight
         ref={fillLightRef}
         intensity={0}
-        distance={30}
-        color="#3ec76e"
-        decay={1.0}
+        distance={18}
+        color="#25753e"
+        decay={1.1}
       />
     </>
   );
@@ -1385,12 +1385,13 @@ export default function DesktopScene() {
       // Reproducir sonido de agarrar la cámara de inmediato sin latencia
       playSound('camera_pickup', 0.95);
 
-      // La cámara desaparece de la mesa
+      // La cámara desaparece de la mesa y se limpia cualquier hover
       setIsCameraOnDesk(false);
+      setHoveredItem(null);
 
-      // Micro-destello de apertura de sensor infrarrojo fosforescente (90ms, sin pantalla negra)
+      // Micro-destello sutil de apertura de sensor infrarrojo fosforescente (60ms)
       setSensorFlash(true);
-      setTimeout(() => setSensorFlash(false), 90);
+      setTimeout(() => setSensorFlash(false), 60);
 
       // Activar visión nocturna y visor inmediatamente
       setIsCamcorderActive(true);
@@ -1400,6 +1401,7 @@ export default function DesktopScene() {
       playSound('nightvision_off', 0.85);
       setIsCamcorderActive(false);
       setIsCameraOnDesk(true);
+      setHoveredItem(null);
       setZoomLevel(1.0);
     }
   };
@@ -1454,29 +1456,29 @@ export default function DesktopScene() {
       <div className="w-full h-full">
         <Canvas camera={{ position: [0, 3.5, 4], fov: 60 }}>
           <color attach="background" args={['#020403']} />
-          <fog attach="fog" args={['#020403', 2.5, isCamcorderActive ? 18 : 13]} />
+          <fog attach="fog" args={['#020503', 2.0, isCamcorderActive ? 16 : 13]} />
 
-          {/* Iluminación base adaptada: En visión nocturna el ambiente se tiñe de fósforo verde */}
+          {/* Iluminación base adaptada: En visión nocturna el ambiente mantiene oscuridad tétrica de Outlast */}
           <ambientLight
-            intensity={isCamcorderActive ? 1.5 : 0.08}
-            color={isCamcorderActive ? "#1e5c33" : "#16221a"}
+            intensity={isCamcorderActive ? 0.22 : 0.08}
+            color={isCamcorderActive ? "#183e25" : "#16221a"}
           />
           <hemisphereLight
-            args={isCamcorderActive ? ['#4ecc78', '#143c22', 1.15] : ['#29362c', '#080c09', 0.22]}
+            args={isCamcorderActive ? ['#285936', '#0a1a10', 0.4] : ['#29362c', '#080c09', 0.22]}
           />
 
           {/* Rebote ambiental de hospital psiquiátrico */}
           <pointLight
             position={[-5, 1.5, -1]}
-            intensity={isCamcorderActive ? 14 : 11}
-            distance={8.5}
-            color={isCamcorderActive ? "#34a85c" : "#1c3629"}
+            intensity={isCamcorderActive ? 7 : 11}
+            distance={7.5}
+            color={isCamcorderActive ? "#266b3d" : "#1c3629"}
           />
           <pointLight
             position={[-3.8, 1.15, 0.7]}
-            intensity={isCamcorderActive ? 9 : 5}
-            distance={6.0}
-            color={isCamcorderActive ? "#2b8c4c" : "#1d3628"}
+            intensity={isCamcorderActive ? 4 : 5}
+            distance={5.0}
+            color={isCamcorderActive ? "#215733" : "#1d3628"}
           />
 
           {/* Linterna Infrarroja (IR Spotlight) que ilumina hacia donde mira el jugador con zoom dinámico */}
@@ -1576,8 +1578,8 @@ export default function DesktopScene() {
         isDocumentOrTerminalOpen={activeOverlay !== 'none' || animatingTo === 'terminal'}
       />
 
-      {/* In-Game HUD Interaction Prompt (Foto 4: "Pulsa (BOTÓN IZQUIERDO DEL RATÓN) para coger Documento", etc.) */}
-      {hoveredItem && animatingTo === 'none' && activeOverlay === 'none' && !isInMainMenu && (
+      {/* In-Game HUD Interaction Prompt (oculto si la cámara está activa o en el menú) */}
+      {!isCamcorderActive && hoveredItem && animatingTo === 'none' && activeOverlay === 'none' && !isInMainMenu && (
         <div className="fixed bottom-10 left-0 right-0 z-30 flex justify-center pointer-events-none select-none animate-in fade-in duration-200">
           <div className="bg-black/75 border border-white/20 text-[#eaeaea] px-6 py-2 rounded-xs font-typewriter text-xs sm:text-sm tracking-wider shadow-[0_4px_30px_rgba(0,0,0,0.95)] backdrop-blur-sm flex items-center gap-2">
             <span>Pulsa</span>
