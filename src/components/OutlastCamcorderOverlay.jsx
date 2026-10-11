@@ -130,13 +130,13 @@ export default function OutlastCamcorderOverlay({
 
   const overlayVisibilityClass = isActive
     ? isDocumentOrTerminalOpen
-      ? 'opacity-20 pointer-events-none'
-      : 'opacity-100 pointer-events-auto'
-    : 'opacity-0 pointer-events-none';
+      ? 'opacity-20'
+      : 'opacity-100'
+    : 'opacity-0';
   const segmentsFilled = Math.ceil((batteryLevel / 100) * 4);
 
   return (
-    <div className={`fixed inset-0 z-40 select-none transition-opacity duration-200 ${overlayVisibilityClass}`}>
+    <div className={`fixed inset-0 z-40 select-none pointer-events-none transition-opacity duration-200 ${overlayVisibilityClass}`}>
       {/* =========================================================================
           LENTE DE VISIÓN NOCTURNA OUTLAST:
           Tubo óptico auténtico, viñeteado cinematográfico y grano analógico
