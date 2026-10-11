@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Humble Wall';
+  src: url('/assets/fonts/HumbleWall.ttf') format('truetype');
+  font-display: swap;
+}
+
 @layer base {
   body {
     @apply bg-murkoff-black text-murkoff-paper font-typewriter overflow-x-hidden;

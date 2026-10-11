@@ -365,6 +365,42 @@ const InvestigationCorkboard = () => (
     <Box args={[1.5, 0.015, 0.02]} position={[-0.3, 0.1, 0.056]} rotation={[0, 0, -0.35]}>
       <meshBasicMaterial color="#b30000" />
     </Box>
+
+    {/* Credenciales de acceso escritas en la pared debajo del tablero con fuente Humble Wall */}
+    <group position={[0, -1.45, 0.015]} rotation={[0, 0, -0.025]}>
+      <Text
+        font="/assets/fonts/HumbleWall.ttf"
+        fontSize={0.28}
+        color="#4e0505"
+        letterSpacing={0.06}
+        anchorX="center"
+        anchorY="middle"
+      >
+        USUARIO: crojas
+      </Text>
+      <Text
+        position={[0, -0.34, 0]}
+        font="/assets/fonts/HumbleWall.ttf"
+        fontSize={0.28}
+        color="#4e0505"
+        letterSpacing={0.06}
+        anchorX="center"
+        anchorY="middle"
+      >
+        PASSWORD: murkoff
+      </Text>
+
+      {/* Chorretones de sangre seca debajo de las credenciales */}
+      {[-0.65, -0.15, 0.45].map((dx, i) => (
+        <Box
+          key={i}
+          args={[0.02, 0.28 + i * 0.08, 0.003]}
+          position={[dx, -0.56 - i * 0.04, 0.002]}
+        >
+          <meshStandardMaterial color="#350303" roughness={0.7} opacity={0.9} transparent />
+        </Box>
+      ))}
+    </group>
   </group>
 );
 
