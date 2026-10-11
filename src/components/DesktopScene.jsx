@@ -1325,6 +1325,42 @@ export default function DesktopScene() {
   const [baseYaw, setBaseYaw] = useState(0); // Ángulo base de rotación en pasos de 90°
   const lastTurnTime = useRef(0);
 
+  // Sonido ambiental tétrico y pesado de Outlast en bucle continuo
+  const ambientAudioRef = useRef(null);
+
+  useEffect(() => {
+    const audio = new Audio('/assets/sounds/ambiencesound.wav');
+    audio.loop = true;
+    audio.volume = 0.22; // Nivel bajo y pesado para generar tensión inmersiva
+    ambientAudioRef.current = audio;
+
+    const startAmbience = () => {
+      if (ambientAudioRef.current) {
+        ambientAudioRef.current.play().catch(() => {});
+      }
+    };
+
+    window.addEventListener('click', startAmbience, { once: true });
+    window.addEventListener('keydown', startAmbience, { once: true });
+    startAmbience();
+
+    return () => {
+      window.removeEventListener('click', startAmbience);
+      window.removeEventListener('keydown', startAmbience);
+      if (ambientAudioRef.current) {
+        ambientAudioRef.current.pause();
+        ambientAudioRef.current = null;
+      }
+    };
+  }, []);
+
+  // Intensidad adaptativa con la videocámara activa
+  useEffect(() => {
+    if (ambientAudioRef.current) {
+      ambientAudioRef.current.volume = isCamcorderActive ? 0.28 : 0.20;
+    }
+  }, [isCamcorderActive]);
+
   const playTurnSound = () => {
     try {
       const audio = new Audio('/assets/sounds/camera_turn.wav');

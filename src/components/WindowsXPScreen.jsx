@@ -1,18 +1,37 @@
 import { useState, useEffect, useRef } from 'react';
 
-// Reproducción de efectos de sonido mediante archivos .wav
+// Reproducción de efectos de sonido mediante archivos .wav y .mp3
 const playXPChime = () => {
   try {
-    const audio = new Audio('/assets/sounds/xp_startup.wav');
+    const audio = new Audio('/assets/sounds/xp_startup.mp3');
     audio.volume = 0.8;
-    audio.play().catch(() => {});
+    audio.play().catch(() => {
+      new Audio('/assets/sounds/xp_startup.wav').play().catch(() => {});
+    });
   } catch (err) {}
 };
 
 const playXPClick = () => {
   try {
-    const audio = new Audio('/assets/sounds/xp_click.wav');
-    audio.volume = 0.6;
+    const audio = new Audio('/assets/sounds/xp_click.mp3');
+    audio.volume = 0.55;
+    audio.play().catch(() => {
+      new Audio('/assets/sounds/xp_click.wav').play().catch(() => {});
+    });
+  } catch (err) {}
+};
+
+export const playKeySound = (key) => {
+  try {
+    let src;
+    if (key === ' ' || key === 'Space' || key === 'Spacebar') {
+      src = '/assets/sounds/Space.wav';
+    } else {
+      const keys = ['/assets/sounds/Key1.wav', '/assets/sounds/key2.wav', '/assets/sounds/key3.wav'];
+      src = keys[Math.floor(Math.random() * keys.length)];
+    }
+    const audio = new Audio(src);
+    audio.volume = 0.45;
     audio.play().catch(() => {});
   } catch (err) {}
 };
@@ -250,6 +269,7 @@ export default function WindowsXPScreen({ isZoomedIn = false, onZoomIn = () => {
                         type="text"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
+                        onKeyDown={(e) => playKeySound(e.key)}
                         className="w-full px-3 py-1.5 bg-white text-black font-sans text-sm rounded-xs border-2 border-blue-400 focus:outline-none focus:ring-2 focus:ring-[#ff9015] shadow-inner font-medium"
                         placeholder="Nombre de usuario"
                       />
@@ -262,6 +282,7 @@ export default function WindowsXPScreen({ isZoomedIn = false, onZoomIn = () => {
                           type="password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
+                          onKeyDown={(e) => playKeySound(e.key)}
                           className="flex-1 px-3 py-1.5 bg-white text-black font-sans text-sm rounded-xs border-2 border-blue-400 focus:outline-none focus:ring-2 focus:ring-[#ff9015] shadow-inner tracking-widest font-bold"
                           placeholder="••••••••"
                           autoFocus={isZoomedIn}
@@ -480,6 +501,7 @@ export default function WindowsXPScreen({ isZoomedIn = false, onZoomIn = () => {
                     type="text"
                     value={commandInput}
                     onChange={(e) => setCommandInput(e.target.value)}
+                    onKeyDown={(e) => playKeySound(e.key)}
                     placeholder="Escribe un comando (ej: proyectos, ayuda)..."
                     className="flex-1 bg-transparent text-white font-mono text-xs focus:outline-none placeholder:text-white/40"
                     autoFocus
